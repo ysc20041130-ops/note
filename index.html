@@ -7,18 +7,16 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
-        /* 1. 顏色變數與基礎樣式 */
         :root {
             --ysc-blue: #607d8b;
             --lcl-pink: #ffafbd;
-            --accent: var(--lcl-pink); /* 預設顏色 */
+            --accent: var(--lcl-pink);
             --bg: #fdf2f4;
-            --text: #4a4a4a;
         }
 
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; color: var(--text); padding: 15px; padding-bottom: 50px; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; color: #4a4a4a; padding: 15px; padding-bottom: 50px; }
         
-        /* 2. 獨立登入介面 */
+        /* 登入介面 */
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
             background: #fdf2f4; z-index: 9999;
@@ -32,26 +30,28 @@
         .btn-ysc { background-color: var(--ysc-blue); }
         .btn-lcl { background-color: var(--lcl-pink); }
 
-        /* 3. 主介面樣式 */
+        /* 主介面樣式 */
         .section { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         h2 { font-size: 1.1rem; color: var(--accent); margin-top: 0; border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+        h3 { font-size: 0.9rem; color: #888; margin: 15px 0 5px 0; }
         
         .input-group { display: flex; gap: 8px; margin-bottom: 15px; }
-        input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #eee; outline: none; }
+        input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #eee; outline: none; font-size: 16px; }
         button.add-btn { background: var(--accent); color: white; border: none; padding: 0 15px; border-radius: 12px; font-weight: bold; }
 
         .item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f9f9f9; }
         .plan-tag { background: var(--accent); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-top: 2px; }
 
-        /* 4. 日曆網格 */
+        /* 日曆網格 */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
         .weekday-header { font-size: 0.7rem; color: #999; text-align: center; padding-bottom: 5px; }
-        .day-card { background: #fff; border: 1px solid #feefee; border-radius: 10px; min-height: 60px; padding: 5px; cursor: pointer; display: flex; flex-direction: column; }
+        .day-card { background: #fff; border: 1px solid #feefee; border-radius: 10px; min-height: 65px; padding: 5px; cursor: pointer; display: flex; flex-direction: column; }
         .day-card.is-past { background: #f5f5f5; opacity: 0.5; pointer-events: none; }
         .day-card.is-today { border: 2px solid var(--accent); background: #fff0f3; }
         .date-label { font-size: 0.6rem; font-weight: bold; color: #bbb; }
 
-        .archive-list { font-size: 0.8rem; color: #999; max-height: 150px; overflow-y: auto; }
+        .archive-list { font-size: 0.75rem; color: #999; max-height: 120px; overflow-y: auto; }
+        .wish-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dotted #eee; font-size: 0.9rem; }
     </style>
 </head>
 <body>
@@ -78,12 +78,28 @@
     </div>
 
     <div class="section">
-        <h2>🍰 豬癮犯了 / 想去的地方</h2>
+        <h2>🍰 願望清單 (Wish List)</h2>
+        
+        <h3>📍 豬癮犯了 (美食)</h3>
         <div class="input-group">
-            <input type="text" id="wishInput" placeholder="想吃/去/做什麼？">
-            <button class="add-btn" onclick="addWish('food', document.getElementById('wishInput'))">添加</button>
+            <input type="text" id="input-food" placeholder="想吃什麼...">
+            <button class="add-btn" onclick="addWish('food')">添加</button>
         </div>
-        <div id="wish-food"></div>
+        <div id="list-food"></div>
+
+        <h3>📍 腳要痛了 (旅遊/去哪)</h3>
+        <div class="input-group">
+            <input type="text" id="input-travel" placeholder="想去哪裡...">
+            <button class="add-btn" onclick="addWish('travel')">添加</button>
+        </div>
+        <div id="list-travel"></div>
+
+        <h3>📍 總得做點什麼 (活動)</h3>
+        <div class="input-group">
+            <input type="text" id="input-activity" placeholder="想做什麼...">
+            <button class="add-btn" onclick="addWish('activity')">添加</button>
+        </div>
+        <div id="list-activity"></div>
     </div>
 
     <div class="section">
@@ -93,7 +109,6 @@
     </div>
 
     <script>
-        // --- 1. 初始化 Firebase ---
         const firebaseConfig = {
             apiKey: "AIzaSyDvzd2ZhT-HfuJoJ28S14cun-6D_wNILtg",
             authDomain: "ourloveplanner.firebaseapp.com",
@@ -110,20 +125,14 @@
         const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-        // --- 2. 核心啟動函數 ---
         function initApp(u) {
             currentUser = u;
             document.getElementById('login-screen').style.display = 'none';
-            
-            // 主題變色
             const themeColor = (u === 'ysc') ? '#607d8b' : '#ffafbd';
             document.documentElement.style.setProperty('--accent', themeColor);
-            
-            // 開始實時監聽
             db.ref('data').on('value', s => render(s.val() || {}));
         }
 
-        // --- 3. 功能函式 ---
         function getToday() { const d = new Date(); d.setHours(0,0,0,0); return d; }
         function formatDate(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 
@@ -134,10 +143,11 @@
             i.value = '';
         }
 
-        function addWish(cat, el) {
-            if(!el.value) return;
-            db.ref('data/wishes/' + cat).push({ text: el.value, by: currentUser });
-            el.value = '';
+        function addWish(cat) {
+            const i = document.getElementById('input-' + cat);
+            if(!i.value) return;
+            db.ref('data/wishes/' + cat).push({ text: i.value, by: currentUser });
+            i.value = '';
         }
 
         function editPlan(date) {
@@ -155,9 +165,8 @@
             });
         }
 
-        // --- 4. 渲染介面 ---
         function render(data) {
-            // 任務消息
+            // 1. 任務消息
             const todo = document.getElementById('todoList');
             const arch = document.getElementById('archiveList');
             todo.innerHTML = ''; arch.innerHTML = '';
@@ -168,16 +177,18 @@
                 else if(t.to === currentUser) todo.innerHTML += `<div class="item"><span>${t.text}</span><button onclick="db.ref('data/tasks/${id}').update({completed:true})">✅</button></div>`;
             });
 
-            // 願望清單
-            const wishEl = document.getElementById('wish-food');
-            wishEl.innerHTML = '';
-            if(data.wishes && data.wishes.food) {
-                Object.entries(data.wishes.food).forEach(([id, w]) => {
-                    wishEl.innerHTML += `<div class="item"><span>${w.text}</span><span onclick="db.ref('data/wishes/food/${id}').remove()">🗑️</span></div>`;
-                });
-            }
+            // 2. Wish List 三個分類
+            ['food', 'travel', 'activity'].forEach(cat => {
+                const listEl = document.getElementById('list-' + cat);
+                listEl.innerHTML = '';
+                if(data.wishes && data.wishes[cat]) {
+                    Object.entries(data.wishes[cat]).forEach(([id, w]) => {
+                        listEl.innerHTML += `<div class="wish-item"><span>${w.text}</span><span onclick="db.ref('data/wishes/${cat}/${id}').remove()" style="cursor:pointer">🗑️</span></div>`;
+                    });
+                }
+            });
 
-            // 日曆
+            // 3. 日曆
             const cal = document.getElementById('rollingCalendar');
             const head = document.getElementById('weekdayHeaders');
             cal.innerHTML = ''; head.innerHTML = '';
@@ -193,11 +204,8 @@
                 const card = document.createElement('div');
                 card.className = `day-card ${isPast?'is-past':''} ${dKey===formatDate(getToday())?'is-today':''}`;
                 if(!isPast) card.onclick = () => editPlan(dKey);
-
                 let plans = "";
                 if(data.plans && data.plans[dKey]) Object.values(data.plans[dKey]).forEach(p => plans += `<div class="plan-tag">${p}</div>`);
-
-                // 顯示為 11/Apr 格式
                 const dateDisplay = `${curr.getDate()}/${monthNames[curr.getMonth()]}`;
                 card.innerHTML = `<span class="date-label">${dateDisplay}</span><div style="flex:1;overflow:hidden">${plans}</div>`;
                 cal.appendChild(card);
