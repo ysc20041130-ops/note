@@ -3,57 +3,45 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Our Love Planner</title>
+    <title>Our Love Planner Pro</title>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
-        :root {
-            --ysc-blue: #607d8b;
-            --lcl-pink: #ffafbd;
-            --accent: var(--lcl-pink); /* 預設顏色 */
-            --bg: #fdf2f4;
-            --text: #4a4a4a;
-        }
-
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; color: var(--text); padding: 15px; padding-bottom: 50px; }
+        :root { --ysc-blue: #607d8b; --lcl-pink: #ffafbd; --accent: var(--lcl-pink); --bg: #fdf2f4; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; color: #4a4a4a; padding: 15px; padding-bottom: 80px; transition: background 0.3s; }
         
-        /* 獨立登入介面 */
-        #login-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: #fdf2f4; z-index: 9999;
-            display: flex; flex-direction: column; align-items: center; justify-content: center;
-        }
-        .login-btn {
-            width: 200px; padding: 20px; margin: 15px; border-radius: 50px;
-            border: none; font-size: 1.2rem; font-weight: bold; color: white; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: 0.2s;
-        }
-        .login-btn:active { transform: scale(0.95); }
-        .btn-ysc { background-color: var(--ysc-blue); }
-        .btn-lcl { background-color: var(--lcl-pink); }
+        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fdf2f4; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
+        .login-btn { width: 200px; padding: 20px; margin: 15px; border-radius: 50px; border: none; font-size: 1.2rem; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        .btn-ysc { background-color: var(--ysc-blue); } .btn-lcl { background-color: var(--lcl-pink); }
 
-        /* 主介面樣式 */
         .section { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         h2 { font-size: 1.1rem; color: var(--accent); margin-top: 0; border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
-        h3 { font-size: 0.9rem; color: #888; margin: 15px 0 5px 0; }
         
         .input-group { display: flex; gap: 8px; margin-bottom: 15px; }
-        input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #eee; outline: none; font-size: 16px; }
+        input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #eee; outline: none; }
         button.add-btn { background: var(--accent); color: white; border: none; padding: 0 15px; border-radius: 12px; font-weight: bold; }
 
-        .item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f9f9f9; }
-        .plan-tag { background: var(--accent); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-top: 2px; cursor: pointer; }
+        /* 拖拽相關樣式 */
+        .wish-item { display: flex; justify-content: space-between; padding: 10px; background: #fff; border: 1px solid #f0f0f0; border-radius: 10px; margin-bottom: 5px; cursor: grab; font-size: 0.9rem; }
+        .wish-item:active { cursor: grabbing; opacity: 0.6; }
+        .plan-tag { background: var(--accent); color: white; padding: 3px 6px; border-radius: 4px; font-size: 0.7rem; margin-top: 2px; cursor: grab; display: block; word-break: break-all; }
 
         /* 日曆網格 */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-        .weekday-header { font-size: 0.7rem; color: #999; text-align: center; padding-bottom: 5px; }
-        .day-card { background: #fff; border: 1px solid #feefee; border-radius: 10px; min-height: 65px; padding: 5px; cursor: pointer; display: flex; flex-direction: column; overflow: hidden; }
-        .day-card.is-past { background: #f5f5f5; opacity: 0.5; pointer-events: none; }
-        .day-card.is-today { border: 2px solid var(--accent); background: #fff0f3; }
-        .date-label { font-size: 0.6rem; font-weight: bold; color: #bbb; }
+        .day-card { background: #fff; border: 1px solid #feefee; border-radius: 10px; min-height: 70px; padding: 5px; display: flex; flex-direction: column; position: relative; }
+        .day-card.drag-over { background: #fff0f3; border: 2px dashed var(--accent); }
+        .day-card.is-today { border: 2px solid var(--accent); }
+        .date-label { font-size: 0.6rem; font-weight: bold; color: #bbb; pointer-events: none; }
 
-        .archive-list { font-size: 0.75rem; color: #999; max-height: 120px; overflow-y: auto; }
-        .wish-item { display: flex; justify-content: space-between; padding: 8px 0; border-bottom: 1px dotted #eee; font-size: 0.9rem; }
+        /* 側邊垃圾桶 */
+        #trash-can {
+            position: fixed; top: 0; right: -80px; width: 80px; height: 100%;
+            background: #ff4d4d; color: white; display: flex; align-items: center; justify-content: center;
+            writing-mode: vertical-rl; text-orientation: mixed; font-weight: bold; font-size: 1.2rem;
+            transition: 0.3s; z-index: 1000; box-shadow: -5px 0 15px rgba(0,0,0,0.1);
+        }
+        #trash-can.visible { right: 0; }
+        #trash-can.drag-over { background: #b30000; width: 100px; }
     </style>
 </head>
 <body>
@@ -63,6 +51,8 @@
         <button class="login-btn btn-ysc" onclick="initApp('ysc')">ysc</button>
         <button class="login-btn btn-lcl" onclick="initApp('lcl')">lcl</button>
     </div>
+
+    <div id="trash-can">🗑️ 拖到這裡刪除</div>
 
     <div class="section">
         <h2 id="morningTitle">早上必讀</h2>
@@ -74,44 +64,21 @@
     </div>
 
     <div class="section">
-        <h2>🗓️ 接下來 35 天</h2>
-        <div id="weekdayHeaders" class="calendar-grid"></div>
+        <h2>🗓️ 滾動日曆 (拖動願望到此)</h2>
+        <div id="weekdayHeaders" class="calendar-grid" style="font-size: 0.7rem; color: #999; text-align: center; margin-bottom: 5px;"></div>
         <div id="rollingCalendar" class="calendar-grid"></div>
     </div>
 
     <div class="section">
-        <h2>🍰 願望清單 (Wish List)</h2>
-        
-        <h3>📍 豬癮犯了 (美食)</h3>
+        <h2>🍰 願望清單 (按住拖動)</h2>
         <div class="input-group">
-            <input type="text" id="input-food" placeholder="想吃什麼...">
-            <button class="add-btn" onclick="addWish('food')">添加</button>
+            <input type="text" id="wishInput" placeholder="新增願望...">
+            <button class="add-btn" onclick="addWish()">添加</button>
         </div>
-        <div id="list-food"></div>
-
-        <h3>📍 腳要痛了 (旅遊/去哪)</h3>
-        <div class="input-group">
-            <input type="text" id="input-travel" placeholder="想去哪裡...">
-            <button class="add-btn" onclick="addWish('travel')">添加</button>
-        </div>
-        <div id="list-travel"></div>
-
-        <h3>📍 總得做點什麼 (活動)</h3>
-        <div class="input-group">
-            <input type="text" id="input-activity" placeholder="想做什麼...">
-            <button class="add-btn" onclick="addWish('activity')">添加</button>
-        </div>
-        <div id="list-activity"></div>
-    </div>
-
-    <div class="section">
-        <h2>📜 我們的回憶</h2>
-        <div id="archiveList" class="archive-list"></div>
-        <button onclick="generateLoveReport()" style="width:100%; margin-top:10px; padding:10px; border-radius:10px; border:1px solid #eee; background:none; color:#999; font-size:0.8rem;">📊 生成 Gemini 戀愛報告</button>
+        <div id="wishListContainer"></div>
     </div>
 
     <script>
-        // --- Firebase 配置 ---
         const firebaseConfig = {
             apiKey: "AIzaSyDvzd2ZhT-HfuJoJ28S14cun-6D_wNILtg",
             authDomain: "ourloveplanner.firebaseapp.com",
@@ -125,19 +92,16 @@
         const db = firebase.database();
 
         let currentUser = '';
-        const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
         const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+        let draggedItem = null;
 
-        // --- 核心啟動 ---
         function initApp(u) {
             currentUser = u;
             document.getElementById('login-screen').style.display = 'none';
-            const themeColor = (u === 'ysc') ? '#607d8b' : '#ffafbd';
-            document.documentElement.style.setProperty('--accent', themeColor);
+            document.documentElement.style.setProperty('--accent', (u === 'ysc' ? '#607d8b' : '#ffafbd'));
             db.ref('data').on('value', s => render(s.val() || {}));
         }
 
-        // --- 功能函式 ---
         function getToday() { const d = new Date(); d.setHours(0,0,0,0); return d; }
         function formatDate(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
 
@@ -148,63 +112,65 @@
             i.value = '';
         }
 
-        function addWish(cat) {
-            const i = document.getElementById('input-' + cat);
+        function addWish() {
+            const i = document.getElementById('wishInput');
             if(!i.value) return;
-            db.ref('data/wishes/' + cat).push({ text: i.value, by: currentUser });
+            db.ref('data/wishes').push({ text: i.value, by: currentUser });
             i.value = '';
         }
 
-        function editPlan(date) {
-            const val = prompt(`在 ${date} 添加計畫:`);
-            if(val) db.ref('data/plans/' + date).push(val);
+        // --- 拖拽核心邏輯 ---
+        function handleDragStart(e, type, data) {
+            draggedItem = { type, ...data };
+            document.getElementById('trash-can').classList.add('visible');
+            e.dataTransfer.setData('text/plain', ''); // 必需
         }
 
-        function deletePlan(date, id, text) {
-            if(confirm(`要刪除 "${text}" 嗎？`)) {
-                db.ref(`data/plans/${date}/${id}`).remove();
-            }
+        function handleDragEnd() {
+            document.getElementById('trash-can').classList.remove('visible');
+            document.getElementById('trash-can').classList.remove('drag-over');
         }
 
-        function generateLoveReport() {
-            db.ref('data').once('value', s => {
-                const data = s.val() || {};
-                const archives = Object.values(data.tasks || {}).filter(t => t.completed).slice(-10);
-                let report = `這是我和伴侶的紀錄：\n完成：${archives.map(t=>t.text).join(', ')}\n請評價我們的互動！`;
-                navigator.clipboard.writeText(report);
-                alert("報告已複製，請貼給 Gemini！");
-            });
+        function setupDragEvents() {
+            const trash = document.getElementById('trash-can');
+            trash.ondragover = (e) => { e.preventDefault(); trash.classList.add('drag-over'); };
+            trash.ondragleave = () => trash.classList.remove('drag-over');
+            trash.ondrop = () => {
+                if(draggedItem.type === 'wish') db.ref(`data/wishes/${draggedItem.id}`).remove();
+                if(draggedItem.type === 'plan') db.ref(`data/plans/${draggedItem.date}/${draggedItem.id}`).remove();
+            };
         }
 
-        // --- 渲染畫面 ---
         function render(data) {
-            // 任務渲染
+            setupDragEvents();
+            // 任務消息
             const todo = document.getElementById('todoList');
-            const arch = document.getElementById('archiveList');
-            todo.innerHTML = ''; arch.innerHTML = '';
+            todo.innerHTML = '';
             document.getElementById('morningTitle').innerText = `早上必讀：${currentUser==='ysc'?'lcl':'ysc'} 的消息`;
-            
             Object.entries(data.tasks || {}).reverse().forEach(([id, t]) => {
-                if(t.completed) arch.innerHTML += `<div class="item" style="font-size:0.7rem;">${t.text} ✅</div>`;
-                else if(t.to === currentUser) todo.innerHTML += `<div class="item"><span>${t.text}</span><button onclick="db.ref('data/tasks/${id}').update({completed:true})">✅</button></div>`;
+                if(!t.completed && t.to === currentUser) {
+                    todo.innerHTML += `<div class="item" style="display:flex; justify-content:space-between; padding:10px 0;"><span>${t.text}</span><button onclick="db.ref('data/tasks/${id}').update({completed:true})">✅</button></div>`;
+                }
             });
 
-            // Wish List 分類渲染
-            ['food', 'travel', 'activity'].forEach(cat => {
-                const listEl = document.getElementById('list-' + cat);
-                listEl.innerHTML = '';
-                if(data.wishes && data.wishes[cat]) {
-                    Object.entries(data.wishes[cat]).forEach(([id, w]) => {
-                        listEl.innerHTML += `<div class="wish-item"><span>${w.text}</span><span onclick="db.ref('data/wishes/${cat}/${id}').remove()" style="cursor:pointer">🗑️</span></div>`;
-                    });
-                }
+            // Wish List 渲染 (可拖拽)
+            const wishCont = document.getElementById('wishListContainer');
+            wishCont.innerHTML = '';
+            Object.entries(data.wishes || {}).forEach(([id, w]) => {
+                const el = document.createElement('div');
+                el.className = 'wish-item';
+                el.draggable = true;
+                el.innerHTML = `<span>${w.text}</span><small style="color:#ccc">${w.by}</small>`;
+                el.ondragstart = (e) => handleDragStart(e, 'wish', { id, text: w.text });
+                el.ondragend = handleDragEnd;
+                wishCont.appendChild(el);
             });
 
             // 日曆渲染
             const cal = document.getElementById('rollingCalendar');
             const head = document.getElementById('weekdayHeaders');
             cal.innerHTML = ''; head.innerHTML = '';
-            dayNames.forEach(n => head.innerHTML += `<div class="weekday-header">${n}</div>`);
+            ['日','一','二','三','四','五','六'].forEach(n => head.innerHTML += `<div>${n}</div>`);
 
             const start = getToday();
             start.setDate(start.getDate() - start.getDay());
@@ -216,17 +182,38 @@
                 const card = document.createElement('div');
                 card.className = `day-card ${isPast?'is-past':''} ${dKey===formatDate(getToday())?'is-today':''}`;
                 
-                if(!isPast) card.onclick = () => editPlan(dKey);
-
-                let plansHtml = "";
-                if(data.plans && data.plans[dKey]) {
-                    Object.entries(data.plans[dKey]).forEach(([id, p]) => {
-                        plansHtml += `<div class="plan-tag" onclick="event.stopPropagation(); deletePlan('${dKey}', '${id}', '${p}')">${p}</div>`;
-                    });
+                // 接收拖拽
+                if(!isPast) {
+                    card.ondragover = (e) => { e.preventDefault(); card.classList.add('drag-over'); };
+                    card.ondragleave = () => card.classList.remove('drag-over');
+                    card.ondrop = () => {
+                        card.classList.remove('drag-over');
+                        if(draggedItem.type === 'wish') {
+                            db.ref(`data/plans/${dKey}`).push(draggedItem.text);
+                            db.ref(`data/wishes/${draggedItem.id}`).remove();
+                        } else if(draggedItem.type === 'plan') {
+                            db.ref(`data/plans/${dKey}`).push(draggedItem.text);
+                            db.ref(`data/plans/${draggedItem.date}/${draggedItem.id}`).remove();
+                        }
+                    };
+                    card.onclick = () => { const v = prompt(`計畫:`); if(v) db.ref(`data/plans/${dKey}`).push(v); };
                 }
 
                 const dateDisplay = `${curr.getDate()}/${monthNames[curr.getMonth()]}`;
-                card.innerHTML = `<span class="date-label">${dateDisplay}</span><div style="flex:1;overflow:hidden">${plansHtml}</div>`;
+                card.innerHTML = `<span class="date-label">${dateDisplay}</span>`;
+
+                if(data.plans && data.plans[dKey]) {
+                    Object.entries(data.plans[dKey]).forEach(([id, p]) => {
+                        const pTag = document.createElement('div');
+                        pTag.className = 'plan-tag';
+                        pTag.draggable = true;
+                        pTag.innerText = p;
+                        pTag.onclick = (e) => e.stopPropagation();
+                        pTag.ondragstart = (e) => { e.stopPropagation(); handleDragStart(e, 'plan', { id, date: dKey, text: p }); };
+                        pTag.ondragend = handleDragEnd;
+                        card.appendChild(pTag);
+                    });
+                }
                 cal.appendChild(card);
             }
         }
