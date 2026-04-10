@@ -1,5 +1,5 @@
 <!DOCTYPE html>
-<html lang="zh-Hant">
+<html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
@@ -7,255 +7,202 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
-/* 顏色變數 */
-/* 1. 顏色變數定義 */
-    :root {
-        --ysc-blue: #607d8b;  /* 藍灰色 */
-        --lcl-pink: #ffafbd;  /* 粉色 */
-        --accent: var(--lcl-pink); /* 預設顏色 */
-        --bg: #fdf2f4;
-        --text: #4a4a4a;
-    }
+        /* 1. 顏色變數與基礎樣式 */
+        :root {
+            --ysc-blue: #607d8b;
+            --lcl-pink: #ffafbd;
+            --accent: var(--lcl-pink); /* 預設顏色 */
+            --bg: #fdf2f4;
+            --text: #4a4a4a;
+        }
 
-    /* 2. 登入全螢幕介面 */
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; color: var(--text); padding: 15px; padding-bottom: 50px; }
+        
+        /* 2. 獨立登入介面 */
         #login-screen {
             position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg); z-index: 9999;
+            background: #fdf2f4; z-index: 9999;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
         .login-btn {
             width: 200px; padding: 20px; margin: 15px; border-radius: 50px;
             border: none; font-size: 1.2rem; font-weight: bold; color: white; cursor: pointer;
-            box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.2s;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: 0.2s;
         }
-        .login-btn:active { transform: scale(0.95); }
         .btn-ysc { background-color: var(--ysc-blue); }
         .btn-lcl { background-color: var(--lcl-pink); }
-    
+
         /* 3. 主介面樣式 */
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; color: var(--text); padding: 15px; }
         .section { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         h2 { font-size: 1.1rem; color: var(--accent); margin-top: 0; border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
-        .plan-tag { background: var(--accent); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-top: 2px; }
-
-        /* 日曆網格 */
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
-        .weekday-header { font-size: 0.7rem; color: #999; text-align: center; padding-bottom: 5px; }
-        .day-card { background: #fff; border: 1px solid #feef1; border-radius: 10px; min-height: 70px; padding: 5px; cursor: pointer; display: flex; flex-direction: column; }
-        .day-card.is-past { background: #f5f5f5; border-color: #eee; cursor: default; pointer-events: none; opacity: 0.5; }
-        .day-card.is-today { border: 2px solid var(--accent); background: #fff0f3; }
-        .date-label { font-size: 0.65rem; font-weight: bold; color: #bbb; }
-        .plan-tag { background: var(--accent); color: white; font-size: 0.65rem; padding: 1px 3px; border-radius: 3px; margin-top: 2px; word-break: break-all; }
-
-        /* Wish List 樣式 */
-        .wish-cat { margin-bottom: 15px; border-left: 4px solid var(--main-pink); padding-left: 10px; }
-        .wish-cat h3 { font-size: 0.95rem; margin: 0 0 8px 0; color: #666; }
-        .wish-item { font-size: 0.85rem; background: #fff9fa; padding: 5px 10px; border-radius: 8px; margin-bottom: 5px; display: flex; justify-content: space-between; }
-
-        /* 記憶庫與任務 */
-        .item { display: flex; justify-content: space-between; align-items: center; padding: 8px 0; border-bottom: 1px solid #f9f9f9; font-size: 0.9rem; }
-        input { width: 100%; box-sizing: border-box; padding: 10px; border: 1px solid #eee; border-radius: 10px; outline: none; margin-bottom: 10px; }
         
-        /* Gemini 按鈕 */
-        .gemini-btn { width: 100%; background: linear-gradient(135deg, #6e8efb, #a777e3); color: white; border: none; padding: 12px; border-radius: 15px; font-weight: bold; cursor: pointer; margin-top: 10px; }
+        .input-group { display: flex; gap: 8px; margin-bottom: 15px; }
+        input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #eee; outline: none; }
+        button.add-btn { background: var(--accent); color: white; border: none; padding: 0 15px; border-radius: 12px; font-weight: bold; }
+
+        .item { display: flex; justify-content: space-between; align-items: center; padding: 10px 0; border-bottom: 1px solid #f9f9f9; }
+        .plan-tag { background: var(--accent); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.7rem; margin-top: 2px; }
+
+        /* 4. 日曆網格 */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+        .weekday-header { font-size: 0.7rem; color: #999; text-align: center; padding-bottom: 5px; }
+        .day-card { background: #fff; border: 1px solid #feefee; border-radius: 10px; min-height: 60px; padding: 5px; cursor: pointer; display: flex; flex-direction: column; }
+        .day-card.is-past { background: #f5f5f5; opacity: 0.5; pointer-events: none; }
+        .day-card.is-today { border: 2px solid var(--accent); background: #fff0f3; }
+        .date-label { font-size: 0.6rem; font-weight: bold; color: #bbb; }
+
+        .archive-list { font-size: 0.8rem; color: #999; max-height: 150px; overflow-y: auto; }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-    <h1 style="color: #888; margin-bottom: 30px;">選擇你的身分</h1>
-    <button class="login-btn btn-ysc" onclick="initApp('ysc')">ysc</button>
-    <button class="login-btn btn-lcl" onclick="initApp('lcl')">lcl</button>
-    </div>
-    
-    <div class="identity-selector">
-        <button id="btnYSC" class="tab-btn active" onclick="switchUser('ysc')">ysc</button>
-        <button id="btnLCL" class="tab-btn" onclick="switchUser('lcl')">lcl</button>
+        <h1 style="color: #888; margin-bottom: 30px;">選擇你的身分</h1>
+        <button class="login-btn btn-ysc" onclick="initApp('ysc')">ysc</button>
+        <button class="login-btn btn-lcl" onclick="initApp('lcl')">lcl</button>
     </div>
 
     <div class="section">
         <h2 id="morningTitle">早上必讀</h2>
         <div id="todoList"></div>
-        <input type="text" id="taskInput" placeholder="輸入任務按 Enter 發布..." onkeypress="if(event.key==='Enter') addTask()">
-    </div>
-
-    <div class="section">
-        <h2>🧷 Wish List</h2>
-        
-        <div class="wish-cat">
-            <h3>豬癮犯了</h3>
-            <div id="wish-food"></div>
-            <input type="text" placeholder="想吃什麼？" onkeypress="if(event.key==='Enter') addWish('food', this)">
-        </div>
-
-        <div class="wish-cat">
-            <h3>腳要痛了</h3>
-            <div id="wish-travel"></div>
-            <input type="text" placeholder="想去哪裡玩？" onkeypress="if(event.key==='Enter') addWish('travel', this)">
-        </div>
-
-        <div class="wish-cat">
-            <h3>好無聊</h3>
-            <div id="wish-activity"></div>
-            <input type="text" placeholder="想做什麼有趣的事？" onkeypress="if(event.key==='Enter') addWish('activity', this)">
+        <div class="input-group">
+            <input type="text" id="taskInput" placeholder="給對方留個言吧...">
+            <button class="add-btn" onclick="addTask()">發送</button>
         </div>
     </div>
 
     <div class="section">
-        <h2 id="calendarTitle">📅 未來計畫</h2>
-        <div class="calendar-grid" id="weekdayHeaders"></div>
-        <div class="calendar-grid" id="rollingCalendar"></div>
+        <h2>🗓️ 接下來 35 天</h2>
+        <div id="weekdayHeaders" class="calendar-grid"></div>
+        <div id="rollingCalendar" class="calendar-grid"></div>
     </div>
 
     <div class="section">
-        <h2>📓 長期記憶庫</h2>
-        <button class="gemini-btn" onclick="generateLoveReport()">✨ 讓 Gemini 給予戀愛評價</button>
-        <div id="archiveList" style="margin-top:15px;"></div>
+        <h2>🍰 豬癮犯了 / 想去的地方</h2>
+        <div class="input-group">
+            <input type="text" id="wishInput" placeholder="想吃/去/做什麼？">
+            <button class="add-btn" onclick="addWish('food', document.getElementById('wishInput'))">添加</button>
+        </div>
+        <div id="wish-food"></div>
     </div>
 
-<script>
-    const firebaseConfig = {
-        apiKey: "AIzaSyDvzd2ZhT-HfuJoJ28S14cun-6D_wNILtg",
-        authDomain: "ourloveplanner.firebaseapp.com",
-        databaseURL: "https://ourloveplanner-default-rtdb.firebaseio.com",
-        projectId: "ourloveplanner",
-        storageBucket: "ourloveplanner.firebasestorage.app",
-        messagingSenderId: "671815155990",
-        appId: "1:671815155990:web:ce0adcdd59f1778cb41037"
-    };
+    <div class="section">
+        <h2>📜 我們的回憶</h2>
+        <div id="archiveList" class="archive-list"></div>
+        <button onclick="generateLoveReport()" style="width:100%; margin-top:10px; padding:10px; border-radius:10px; border:1px solid #eee; background:none; color:#999; font-size:0.8rem;">📊 生成 Gemini 戀愛報告</button>
+    </div>
 
-    firebase.initializeApp(firebaseConfig);
-    const db = firebase.database();
-    let currentUser = 'ysc';
-    const dayNames = ['Sun', 'Mon', 'Tue', 'Wed', 'Thu', 'Fri', 'Sat'];
+    <script>
+        // --- 1. 初始化 Firebase ---
+        const firebaseConfig = {
+            apiKey: "AIzaSyDvzd2ZhT-HfuJoJ28S14cun-6D_wNILtg",
+            authDomain: "ourloveplanner.firebaseapp.com",
+            databaseURL: "https://ourloveplanner-default-rtdb.firebaseio.com",
+            projectId: "ourloveplanner",
+            storageBucket: "ourloveplanner.firebasestorage.app",
+            messagingSenderId: "671815155990",
+            appId: "1:671815155990:web:ce0adcdd59f1778cb41037"
+        };
+        firebase.initializeApp(firebaseConfig);
+        const db = firebase.database();
 
-    const getToday = () => { let d = new Date(); d.setHours(0,0,0,0); return d; };
-    const formatDate = (d) => `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`;
+        let currentUser = '';
+        const dayNames = ['日', '一', '二', '三', '四', '五', '六'];
+        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
-    db.ref('data').on('value', (s) => {
-        const data = s.val() || {};
-        autoArchive(data.plans);
-        render(data);
-        
-    function initApp(u) {
-        currentUser = u;
-        // 隱藏登入介面
-        document.getElementById('login-screen').style.display = 'none';
-    
-        // 根據身分切換主題顏色變數 (--accent)
-        const themeColor = (u === 'ysc') ? '#607d8b' : '#ffafbd';
-        document.documentElement.style.setProperty('--accent', themeColor);
-    
-        // 重新抓取資料並渲染
-        db.ref('data').once('value', s => render(s.val()));
-    }
-    
-    // --- 功能函式 ---
-    function addTask() {
-        const i = document.getElementById('taskInput');
-        if(!i.value) return;
-        db.ref('data/tasks').push({ text: i.value, from: currentUser, to: currentUser==='ysc'?'lcl':'ysc', completed: false, time: new Date().toLocaleString() });
-        i.value = '';
-    }
-
-    function addWish(cat, el) {
-        if(!el.value) return;
-        db.ref('data/wishes/' + cat).push({ text: el.value, by: currentUser });
-        el.value = '';
-    }
-
-    function editPlan(date) {
-        const val = prompt(`在 ${date} 添加計畫:`);
-        if(val) db.ref('data/plans/' + date).push(val);
-    }
-
-    function autoArchive(plans) {
-        if(!plans) return;
-        const todayStr = formatDate(getToday());
-        Object.keys(plans).forEach(date => {
-            if(date < todayStr) {
-                Object.values(plans[date]).forEach(v => {
-                    db.ref('data/tasks').push({ text: `[計畫] ${v}`, completed: true, time: date, finishTime: '自動歸檔' });
-                });
-                db.ref('data/plans/' + date).remove();
-            }
-        });
-    }
-
-    // --- 戀愛報告生成 ---
-    function generateLoveReport() {
-        db.ref('data').once('value', s => {
-            const data = s.val() || {};
-            const archives = Object.values(data.tasks || {}).filter(t => t.completed).slice(-20);
-            const wishes = data.wishes || {};
+        // --- 2. 核心啟動函數 ---
+        function initApp(u) {
+            currentUser = u;
+            document.getElementById('login-screen').style.display = 'none';
             
-            let report = "親愛的 Gemini，這是我和伴侶過去一個月的戀愛紀錄：\n\n【完成的事務】\n";
-            archives.forEach(t => report += `- ${t.text} (${t.time})\n`);
-            report += "\n【目前的願望清單】\n";
-            if(wishes.food) report += "- 想吃：" + Object.values(wishes.food).map(i=>i.text).join(', ') + "\n";
-            if(wishes.travel) report += "- 想去：" + Object.values(wishes.travel).map(i=>i.text).join(', ') + "\n";
+            // 主題變色
+            const themeColor = (u === 'ysc') ? '#607d8b' : '#ffafbd';
+            document.documentElement.style.setProperty('--accent', themeColor);
             
-            report += "\n請根據這些互動評估我們的戀愛狀態，並給我們一些甜蜜的建議或下個月的安排啟發！";
-            
-            console.log(report);
-            alert("已生成報告邏輯！請在對話框輸入：'幫我匯總這段紀錄並評價'，我會為你分析。");
-            // 這裡可以改為直接複製到剪貼板
-            navigator.clipboard.writeText(report);
-            alert("報告內容已複製到剪貼板，請直接貼給 Gemini！");
-        });
-    }
-
-    function render(data) {
-        // 1. 任務與記憶庫
-        const todo = document.getElementById('todoList');
-        const arch = document.getElementById('archiveList');
-        todo.innerHTML = ''; arch.innerHTML = '';
-        document.getElementById('morningTitle').innerText = `早上必讀：${currentUser==='ysc'?'lcl':'ysc'} 的消息`;
-        
-        Object.entries(data.tasks || {}).reverse().forEach(([id, t]) => {
-            if(t.completed) arch.innerHTML += `<div class="archive-item"><b>${t.text}</b> <small>${t.time}</small></div>`;
-            else if(t.to === currentUser) todo.innerHTML += `<div class="item"><span>${t.text}</span><button onclick="db.ref('data/tasks/${id}').update({completed:true, finishTime:new Date().toLocaleString()})">✅</button></div>`;
-        });
-
-        // 2. Wish List
-        ['food', 'travel', 'activity'].forEach(cat => {
-            const el = document.getElementById('wish-' + cat);
-            el.innerHTML = '';
-            if(data.wishes && data.wishes[cat]) {
-                Object.entries(data.wishes[cat]).forEach(([id, w]) => {
-                    el.innerHTML += `<div class="wish-item"><span>${w.text}</span><span onclick="db.ref('data/wishes/${cat}/${id}').remove()" style="cursor:pointer">🗑️</span></div>`;
-                });
-            }
-        });
-
-        // 3. 5週日曆
-        const cal = document.getElementById('rollingCalendar');
-        const head = document.getElementById('weekdayHeaders');
-        cal.innerHTML = ''; head.innerHTML = '';
-        dayNames.forEach(n => head.innerHTML += `<div class="weekday-header">${n}</div>`);
-
-        const start = getToday();
-        start.setDate(start.getDate() - start.getDay());
-
-        for(let i=0; i<35; i++) {
-            const curr = new Date(start); curr.setDate(start.getDate() + i);
-            const dKey = formatDate(curr);
-            const isPast = curr < getToday();
-            const card = document.createElement('div');
-            card.className = `day-card ${isPast?'is-past':''} ${dKey===formatDate(getToday())?'is-today':''}`;
-            if(!isPast) card.onclick = () => editPlan(dKey);
-
-            let plans = "";
-            if(data.plans && data.plans[dKey]) Object.values(data.plans[dKey]).forEach(p => plans += `<div class="plan-tag">${p}</div>`);
-
-            // --- 這是修改後 11/Apr 的樣式 ---
-            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-            const dateDisplay = `${curr.getDate()}/${monthNames[curr.getMonth()]}`;
-
-card.innerHTML = `<span class="date-label">${dateDisplay}</span><div style="flex:1;overflow:hidden">${plans}</div>`;
-cal.appendChild(card);
+            // 開始實時監聽
+            db.ref('data').on('value', s => render(s.val() || {}));
         }
-    }
-</script>
+
+        // --- 3. 功能函式 ---
+        function getToday() { const d = new Date(); d.setHours(0,0,0,0); return d; }
+        function formatDate(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
+
+        function addTask() {
+            const i = document.getElementById('taskInput');
+            if(!i.value) return;
+            db.ref('data/tasks').push({ text: i.value, from: currentUser, to: currentUser==='ysc'?'lcl':'ysc', completed: false, time: new Date().toLocaleString() });
+            i.value = '';
+        }
+
+        function addWish(cat, el) {
+            if(!el.value) return;
+            db.ref('data/wishes/' + cat).push({ text: el.value, by: currentUser });
+            el.value = '';
+        }
+
+        function editPlan(date) {
+            const val = prompt(`在 ${date} 添加計畫:`);
+            if(val) db.ref('data/plans/' + date).push(val);
+        }
+
+        function generateLoveReport() {
+            db.ref('data').once('value', s => {
+                const data = s.val() || {};
+                const archives = Object.values(data.tasks || {}).filter(t => t.completed).slice(-10);
+                let report = `這是我和伴侶的紀錄：\n完成：${archives.map(t=>t.text).join(', ')}\n請評價我們的互動！`;
+                navigator.clipboard.writeText(report);
+                alert("報告已複製，請貼給 Gemini！");
+            });
+        }
+
+        // --- 4. 渲染介面 ---
+        function render(data) {
+            // 任務消息
+            const todo = document.getElementById('todoList');
+            const arch = document.getElementById('archiveList');
+            todo.innerHTML = ''; arch.innerHTML = '';
+            document.getElementById('morningTitle').innerText = `早上必讀：${currentUser==='ysc'?'lcl':'ysc'} 的消息`;
+            
+            Object.entries(data.tasks || {}).reverse().forEach(([id, t]) => {
+                if(t.completed) arch.innerHTML += `<div class="item" style="font-size:0.7rem;">${t.text} ✅</div>`;
+                else if(t.to === currentUser) todo.innerHTML += `<div class="item"><span>${t.text}</span><button onclick="db.ref('data/tasks/${id}').update({completed:true})">✅</button></div>`;
+            });
+
+            // 願望清單
+            const wishEl = document.getElementById('wish-food');
+            wishEl.innerHTML = '';
+            if(data.wishes && data.wishes.food) {
+                Object.entries(data.wishes.food).forEach(([id, w]) => {
+                    wishEl.innerHTML += `<div class="item"><span>${w.text}</span><span onclick="db.ref('data/wishes/food/${id}').remove()">🗑️</span></div>`;
+                });
+            }
+
+            // 日曆
+            const cal = document.getElementById('rollingCalendar');
+            const head = document.getElementById('weekdayHeaders');
+            cal.innerHTML = ''; head.innerHTML = '';
+            dayNames.forEach(n => head.innerHTML += `<div class="weekday-header">${n}</div>`);
+
+            const start = getToday();
+            start.setDate(start.getDate() - start.getDay());
+
+            for(let i=0; i<35; i++) {
+                const curr = new Date(start); curr.setDate(start.getDate() + i);
+                const dKey = formatDate(curr);
+                const isPast = curr < getToday();
+                const card = document.createElement('div');
+                card.className = `day-card ${isPast?'is-past':''} ${dKey===formatDate(getToday())?'is-today':''}`;
+                if(!isPast) card.onclick = () => editPlan(dKey);
+
+                let plans = "";
+                if(data.plans && data.plans[dKey]) Object.values(data.plans[dKey]).forEach(p => plans += `<div class="plan-tag">${p}</div>`);
+
+                // 顯示為 11/Apr 格式
+                const dateDisplay = `${curr.getDate()}/${monthNames[curr.getMonth()]}`;
+                card.innerHTML = `<span class="date-label">${dateDisplay}</span><div style="flex:1;overflow:hidden">${plans}</div>`;
+                cal.appendChild(card);
+            }
+        }
+    </script>
 </body>
 </html>
