@@ -7,20 +7,41 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
-        :root { --main-pink: #ffafbd; --accent: #ff4d6d; --bg: #fdf2f4; --text: #4a4a4a; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); padding: 15px; margin: 0; color: var(--text); }
+/* 顏色變數 */
+/* 1. 顏色變數定義 */
+    :root {
+        --ysc-blue: #607d8b;  /* 藍灰色 */
+        --lcl-pink: #ffafbd;  /* 粉色 */
+        --accent: var(--lcl-pink); /* 預設顏色 */
+        --bg: #fdf2f4;
+        --text: #4a4a4a;
+    }
+
+    /* 2. 登入全螢幕介面 */
+        #login-screen {
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
+            background: var(--bg); z-index: 9999;
+            display: flex; flex-direction: column; align-items: center; justify-content: center;
+        }
+        .login-btn {
+            width: 200px; padding: 20px; margin: 15px; border-radius: 50px;
+            border: none; font-size: 1.2rem; font-weight: bold; color: white; cursor: pointer;
+            box-shadow: 0 4px 15px rgba(0,0,0,0.1); transition: transform 0.2s;
+        }
+        .login-btn:active { transform: scale(0.95); }
+        .btn-ysc { background-color: var(--ysc-blue); }
+        .btn-lcl { background-color: var(--lcl-pink); }
+    
+        /* 3. 主介面樣式 */
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; color: var(--text); padding: 15px; }
         .section { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h2 { font-size: 1.1rem; color: var(--accent); margin-top: 0; border-bottom: 2px solid var(--bg); padding-bottom: 10px; margin-bottom: 15px; }
-        
-        /* 身份切換 */
-        .identity-selector { display: flex; gap: 10px; margin-bottom: 20px; }
-        .tab-btn { flex: 1; padding: 12px; border-radius: 25px; border: none; background: #eee; color: #888; font-weight: bold; cursor: pointer; }
-        .tab-btn.active { background: var(--main-pink); color: white; }
+        h2 { font-size: 1.1rem; color: var(--accent); margin-top: 0; border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
+        .plan-tag { background: var(--accent); color: white; padding: 2px 6px; border-radius: 4px; font-size: 0.75rem; margin-top: 2px; }
 
         /* 日曆網格 */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
         .weekday-header { font-size: 0.7rem; color: #999; text-align: center; padding-bottom: 5px; }
-        .day-card { background: #fff; border: 1px solid #ffeef1; border-radius: 10px; min-height: 70px; padding: 5px; cursor: pointer; display: flex; flex-direction: column; }
+        .day-card { background: #fff; border: 1px solid #feef1; border-radius: 10px; min-height: 70px; padding: 5px; cursor: pointer; display: flex; flex-direction: column; }
         .day-card.is-past { background: #f5f5f5; border-color: #eee; cursor: default; pointer-events: none; opacity: 0.5; }
         .day-card.is-today { border: 2px solid var(--accent); background: #fff0f3; }
         .date-label { font-size: 0.65rem; font-weight: bold; color: #bbb; }
@@ -41,6 +62,12 @@
 </head>
 <body>
 
+    <div id="login-screen">
+    <h1 style="color: #888; margin-bottom: 30px;">選擇你的身分</h1>
+    <button class="login-btn btn-ysc" onclick="initApp('ysc')">ysc</button>
+    <button class="login-btn btn-lcl" onclick="initApp('lcl')">lcl</button>
+    </div>
+    
     <div class="identity-selector">
         <button id="btnYSC" class="tab-btn active" onclick="switchUser('ysc')">ysc</button>
         <button id="btnLCL" class="tab-btn" onclick="switchUser('lcl')">lcl</button>
@@ -109,15 +136,20 @@
         const data = s.val() || {};
         autoArchive(data.plans);
         render(data);
-    });
-
-    function switchUser(u) {
+        
+    function initApp(u) {
         currentUser = u;
-        document.querySelectorAll('.tab-btn').forEach(b => b.classList.remove('active'));
-        document.getElementById('btn' + u.toUpperCase()).classList.add('active');
+        // 隱藏登入介面
+        document.getElementById('login-screen').style.display = 'none';
+    
+        // 根據身分切換主題顏色變數 (--accent)
+        const themeColor = (u === 'ysc') ? '#607d8b' : '#ffafbd';
+        document.documentElement.style.setProperty('--accent', themeColor);
+    
+        // 重新抓取資料並渲染
         db.ref('data').once('value', s => render(s.val()));
     }
-
+    
     // --- 功能函式 ---
     function addTask() {
         const i = document.getElementById('taskInput');
