@@ -216,8 +216,12 @@
             let plans = "";
             if(data.plans && data.plans[dKey]) Object.values(data.plans[dKey]).forEach(p => plans += `<div class="plan-tag">${p}</div>`);
 
-            card.innerHTML = `<span class="date-label">${curr.getMonth()+1}/${curr.getDate()}</span><div style="flex:1;overflow:hidden">${plans}</div>`;
-            cal.appendChild(card);
+            // --- 這是修改後 11/Apr 的樣式 ---
+            const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+            const dateDisplay = `${curr.getDate()}/${monthNames[curr.getMonth()]}`;
+
+card.innerHTML = `<span class="date-label">${dateDisplay}</span><div style="flex:1;overflow:hidden">${plans}</div>`;
+cal.appendChild(card);
         }
     }
 </script>
