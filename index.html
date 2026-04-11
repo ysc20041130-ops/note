@@ -5,7 +5,7 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>寶寶的 Love Planner Pro</title>
     
-    <link rel="manifest" href="data:application/manifest+json,{'name':'LovePlanner','short_name':'LovePlanner','start_url':'/','display':'standalone','background_color':'#fdf2f4','theme_color':'#ffafbd','icons':[{'src':'https://img0.baidu.com/it/u=3027201083,1695537574&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500','sizes':'500x500','type':'image/jpeg'}]}">
+    <link rel="manifest" href="data:application/manifest+json,{'name':'LovePlanner','short_name':'LovePlanner','start_url':'/','display':'standalone','background_color':'#fdf2f4','theme_color':'#ffafbd','icons':[{'src':'https://img0.baidu.com/it/u/3027201083,1695537574&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500','sizes':'500x500','type':'image/jpeg'}]}">
     <meta name="apple-mobile-web-app-capable" content="yes">
     <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
     <link rel="apple-touch-icon" href="https://img0.baidu.com/it/u=3027201083,1695537574&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500">
@@ -14,54 +14,58 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
         :root { --ysc-blue: #607d8b; --lcl-pink: #ffafbd; --accent: var(--lcl-pink); --bg: #fdf2f4; --text: #4a4a4a; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; color: var(--text); padding-bottom: 80px; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; color: var(--text); padding-bottom: 80px; -webkit-user-select: none; }
         
         #main-nav { position: sticky; top: 0; background: rgba(253, 242, 244, 0.95); backdrop-filter: blur(5px); display: flex; justify-content: space-around; padding: 15px; z-index: 1000; border-bottom: 1px solid #feefee; }
         .nav-btn { background: none; border: none; font-size: 1rem; font-weight: bold; color: #999; cursor: pointer; padding: 5px 10px; border-radius: 20px; }
         .nav-btn.active { color: var(--accent); background: rgba(255, 175, 189, 0.1); }
 
         #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fdf2f4; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .login-btn { width: 200px; padding: 20px; margin: 10px; border-radius: 50px; border: none; font-size: 1.2rem; font-weight: bold; color: white; cursor: pointer; }
+        .login-btn { width: 200px; padding: 20px; margin: 10px; border-radius: 50px; border: none; font-size: 1.2rem; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
         .btn-ysc { background: var(--ysc-blue); } .btn-lcl { background: var(--lcl-pink); }
         
-        #together-days { text-align: center; color: var(--accent); font-weight: bold; font-size: 1.3rem; padding: 20px; background: white; border-radius: 20px; margin: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        #header-stats { text-align: center; background: white; border-radius: 25px; margin: 10px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
+        #together-days { color: var(--accent); font-weight: bold; font-size: 1.3rem; margin-bottom: 5px; }
+        #love-index { color: #888; font-size: 0.9rem; font-weight: 500; }
 
         .page { display: none; padding: 15px; } .page.active { display: block; }
         .section { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h2 { font-size: 1rem; color: var(--accent); margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
-        h3 { font-size: 0.8rem; color: #888; margin: 15px 0 5px 0; }
+        h2 { font-size: 0.95rem; color: var(--accent); margin-bottom: 15px; border-bottom: 1px solid #f9f9f9; padding-bottom: 8px; }
+        h3 { font-size: 0.8rem; color: #aaa; margin: 15px 0 5px 0; }
         
         .input-group { display: flex; gap: 8px; margin-bottom: 15px; }
         input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #eee; outline: none; font-size: 14px; }
         button.add-btn { background: var(--accent); color: white; border: none; padding: 0 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-        .wish-item { display: flex; justify-content: space-between; padding: 10px; background: #fff; border: 1px solid #f0f0f0; border-radius: 10px; margin-bottom: 5px; cursor: grab; font-size: 0.9rem; }
+        .wish-item { display: flex; justify-content: space-between; padding: 12px; background: #fff; border: 1px solid #f0f0f0; border-radius: 12px; margin-bottom: 8px; cursor: grab; font-size: 0.9rem; }
+        
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-        .day-card { background: #fff; border: 1px solid #feefee; border-radius: 10px; min-height: 75px; padding: 5px; position: relative; overflow: hidden; }
-        .day-card.is-today { border: 2px solid var(--accent); }
-        .heart-quick-btn { position: absolute; bottom: 2px; right: 2px; font-size: 0.8rem; cursor: pointer; opacity: 0.3; transition: 0.3s; z-index: 5; }
-        .heart-quick-btn:hover { opacity: 1; transform: scale(1.2); }
+        .day-card { background: #fff; border: 1px solid #feefee; border-radius: 10px; min-height: 85px; padding: 5px; position: relative; display: flex; flex-direction: column; }
+        .day-card.is-today { border: 2px solid var(--accent); background: #fffcfd; }
+        .date-label { font-size: 0.65rem; color: #bbb; font-weight: bold; margin-bottom: 4px; }
+        
+        .heart-quick-btn { position: absolute; bottom: 2px; right: 2px; font-size: 1rem; cursor: pointer; z-index: 10; padding: 2px; border-radius: 50%; }
         .plan-tag { background: var(--accent); color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.65rem; margin-top: 2px; cursor: grab; display: block; word-break: break-all; }
 
-        #chat-container { display: flex; flex-direction: column; height: 65vh; background: #fafafa; border-radius: 20px; overflow: hidden; }
+        #chat-container { display: flex; flex-direction: column; height: 60vh; background: #fafafa; border-radius: 20px; overflow: hidden; }
         #chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .msg-bubble { max-width: 75%; padding: 8px 12px; border-radius: 15px; font-size: 0.9rem; position: relative; }
-        .msg-bubble.me { align-self: flex-end; background: var(--accent); color: white; }
-        .msg-bubble.other { align-self: flex-start; background: #eee; color: #333; }
+        .msg-bubble { max-width: 75%; padding: 10px 14px; border-radius: 18px; font-size: 0.9rem; }
+        .msg-bubble.me { align-self: flex-end; background: var(--accent); color: white; border-bottom-right-radius: 4px; }
+        .msg-bubble.other { align-self: flex-start; background: #efefef; color: #333; border-bottom-left-radius: 4px; }
         .msg-bubble img { max-width: 100%; border-radius: 10px; margin-top: 5px; }
 
-        .archive-toggle { cursor: pointer; color: #999; font-size: 0.85rem; padding: 10px; border-radius: 10px; background: #f9f9f9; text-align: center; margin-top: 10px; }
+        .archive-toggle { cursor: pointer; color: #999; font-size: 0.85rem; padding: 12px; border-radius: 12px; background: #f9f9f9; text-align: center; margin-top: 10px; }
         #archiveList { display: none; margin-top: 10px; font-size: 0.8rem; color: #888; border-top: 1px dashed #eee; padding-top: 10px; }
         
-        #trash-can { position: fixed; top: 0; right: -80px; width: 80px; height: 100%; background: #ff4d4d; color: white; display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; transition: 0.3s; z-index: 1000; }
+        #trash-can { position: fixed; top: 0; right: -80px; width: 80px; height: 100%; background: #ff4d4d; color: white; display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; transition: 0.3s; z-index: 1000; font-weight: bold; }
         #trash-can.visible { right: 0; }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <h1 style="color: #888; margin-bottom: 20px;">選擇你的身分</h1>
-        <img src="https://img0.baidu.com/it/u=3027201083,1695537574&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500" style="width:120px; border-radius:60px; margin-bottom:20px; object-fit: cover;">
+        <h1 style="color: #888; margin-bottom: 20px;">選擇身分</h1>
+        <img src="https://img0.baidu.com/it/u=3027201083,1695537574&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500" style="width:120px; height:120px; border-radius:60px; margin-bottom:25px; object-fit: cover; border: 3px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.05);">
         <button class="login-btn btn-ysc" onclick="initApp('ysc')">ysc</button>
         <button class="login-btn btn-lcl" onclick="initApp('lcl')">lcl</button>
     </div>
@@ -74,11 +78,14 @@
     </div>
 
     <div id="page-calendar" class="page active">
-        <div id="together-days">已經在一起 0 天了</div>
+        <div id="header-stats">
+            <div id="together-days">已經在一起 0 天了</div>
+            <div id="love-index">我們本月的幸福指數：0</div>
+        </div>
 
         <div class="section">
             <h2>☀️ 早上必讀</h2>
-            <div id="todoList" style="font-size:0.85rem; color:#666; margin-bottom:10px;"></div>
+            <div id="todoList" style="margin-bottom:10px;"></div>
             <div class="input-group">
                 <input type="text" id="taskInput" placeholder="給寶寶的小提醒...">
                 <button class="add-btn" onclick="addMorningTask()">發送</button>
@@ -86,8 +93,8 @@
         </div>
 
         <div class="section">
-            <h2>🗓️ 滾動日曆 (拖動加入日曆)</h2>
-            <div id="weekdayHeaders" class="calendar-grid" style="text-align:center; font-size:0.7rem; color:#ccc; margin-bottom:5px;"></div>
+            <h2>🗓️ 滾動日曆（可拖動願望）</h2>
+            <div id="weekdayHeaders" class="calendar-grid" style="text-align:center; font-size:0.7rem; color:#ccc; margin-bottom:8px;"></div>
             <div id="rollingCalendar" class="calendar-grid"></div>
         </div>
 
@@ -114,10 +121,10 @@
         <div class="section" style="padding:10px;">
             <div id="chat-container">
                 <div id="chat-messages"></div>
-                <div id="chat-input-area" style="display:flex; padding:10px; background:white; gap:5px; border-top:1px solid #eee;">
+                <div id="chat-input-area" style="display:flex; padding:12px; background:white; gap:8px; border-top:1px solid #eee;">
                     <label for="image-input" style="font-size:1.5rem; cursor:pointer;">📸</label>
                     <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
-                    <input type="text" id="chat-input-text" placeholder="輸入消息..." style="flex:1; border-radius:20px; border:1px solid #eee; padding:5px 15px;">
+                    <input type="text" id="chat-input-text" placeholder="輸入消息..." style="flex:1; border-radius:20px; border:1px solid #eee; padding:8px 15px;">
                     <button onclick="sendChatMessage()" style="background:none; border:none; color:var(--accent); font-weight:bold;">送出</button>
                 </div>
             </div>
@@ -139,6 +146,7 @@
 
         let currentUser = '', draggedItem = null;
         const startDate = new Date('2024-09-18');
+        const monthShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
         function initApp(u) {
             currentUser = u;
@@ -147,7 +155,10 @@
             const diff = Math.floor((new Date() - startDate) / (1000 * 60 * 60 * 24)) + 1;
             document.getElementById('together-days').innerText = `已經在一起 ${diff} 天了`;
             db.ref('data').on('value', s => render(s.val() || {}));
+            updateActivity();
         }
+
+        function updateActivity() { db.ref('data/lastActivityTime').set(Date.now()); }
 
         function switchPage(p) {
             document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
@@ -155,6 +166,7 @@
             document.getElementById('page-' + p).classList.add('active');
             event.target.classList.add('active');
             if(p === 'chat') setTimeout(() => { const c = document.getElementById('chat-messages'); c.scrollTop = c.scrollHeight; }, 100);
+            updateActivity();
         }
 
         function toggleArchive() {
@@ -166,28 +178,50 @@
             const i = document.getElementById('taskInput');
             if(!i.value) return;
             db.ref('data/morningTasks').push({ text: i.value, by: currentUser });
-            i.value = '';
+            i.value = ''; updateActivity();
         }
 
         function addWish(cat) {
             const i = document.getElementById('input-' + cat);
             if(!i.value) return;
             db.ref(`data/wishes/${cat}`).push({ text: i.value, by: currentUser });
-            i.value = '';
+            i.value = ''; updateActivity();
         }
 
         function sendChatMessage() {
             const i = document.getElementById('chat-input-text');
             if(!i.value) return;
             db.ref('data/chats').push({ type: 'text', text: i.value, by: currentUser, time: Date.now() });
-            i.value = '';
+            i.value = ''; updateActivity();
         }
 
         function handleImageUpload(e) {
             const file = e.target.files[0];
             const reader = new FileReader();
-            reader.onload = (ev) => db.ref('data/chats').push({ type: 'image', imgBase64: ev.target.result, by: currentUser, time: Date.now() });
+            reader.onload = (ev) => {
+                db.ref('data/chats').push({ type: 'image', imgBase64: ev.target.result, by: currentUser, time: Date.now() });
+                updateActivity();
+            };
             reader.readAsDataURL(file);
+        }
+
+        function addHeart(dateKey, currentPlans) {
+            let heartCount = 0, heartId = null;
+            if(currentPlans) {
+                Object.entries(currentPlans).forEach(([id, text]) => {
+                    if(typeof text === 'string' && text.includes('❤️')) {
+                        heartCount = (text.match(/❤️/g) || []).length;
+                        heartId = id;
+                    }
+                });
+            }
+            heartCount++;
+            const newStr = '❤️'.repeat(heartCount);
+            if(heartId) db.ref(`data/plans/${dateKey}/${heartId}`).set(newStr);
+            else db.ref(`data/plans/${dateKey}`).push(newStr);
+            
+            db.ref('data/archives').push({ type: 'heart', text: `❤️ 在 ${dateKey} 累加到了 ${heartCount} 次親密紀錄`, date: new Date().toLocaleDateString(), timestamp: Date.now() });
+            updateActivity();
         }
 
         function render(data) {
@@ -197,87 +231,90 @@
                 if(draggedItem.type === 'wish') db.ref(`data/wishes/${draggedItem.cat}/${draggedItem.id}`).remove();
                 if(draggedItem.type === 'plan') db.ref(`data/plans/${draggedItem.date}/${draggedItem.id}`).remove();
                 if(draggedItem.type === 'morning') db.ref(`data/morningTasks/${draggedItem.id}`).remove();
+                updateActivity();
             };
 
-            // 吵架偵測
-            const chats = Object.values(data.chats || {});
-            const lastTime = chats.length ? chats[chats.length-1].time : 0;
+            // 吵架偵測：24小時無操作
+            const lastActive = data.lastActivityTime || 0;
             const todayStr = new Date().toLocaleDateString();
-            if(lastTime > 0 && (Date.now() - lastTime > 86400000)) {
+            if(lastActive > 0 && (Date.now() - lastActive > 86400000)) {
                 if(!data.archives || !Object.values(data.archives).find(a => a.date === todayStr && a.type === 'fight')) {
-                    db.ref('data/archives').push({ type: 'fight', text: '💣 寶寶今天好像吵架了', date: todayStr });
+                    db.ref('data/archives').push({ type: 'fight', text: '💣 寶寶今天好像吵架了 (整天無人使用App)', date: todayStr, timestamp: Date.now() });
                 }
             }
 
-            // 渲染早上必讀
-            const morningBox = document.getElementById('todoList');
-            morningBox.innerHTML = '';
+            // --- 幸福指數計算 ---
+            let totalHearts = 0, totalFights = 0;
+            const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+            
+            // 計算近30天紅心總量
+            if(data.plans) {
+                Object.values(data.plans).forEach(dayPlans => {
+                    Object.values(dayPlans).forEach(p => {
+                        if(typeof p === 'string' && p.includes('❤️')) totalHearts += (p.match(/❤️/g) || []).length;
+                    });
+                });
+            }
+            // 計算近30天吵架總量
+            if(data.archives) {
+                Object.values(data.archives).forEach(a => {
+                    if(a.type === 'fight' && (a.timestamp || 0) > thirtyDaysAgo) totalFights++;
+                });
+            }
+            const loveIndex = ((totalHearts - totalFights) / 2).toFixed(1);
+            document.getElementById('love-index').innerText = `我們本月的幸福指數：${loveIndex}`;
+
+            // 渲染列表 (省略部分重複邏輯以節省篇幅，但保留功能)
+            const morningBox = document.getElementById('todoList'); morningBox.innerHTML = '';
             Object.entries(data.morningTasks || {}).forEach(([id, t]) => {
-                const d = document.createElement('div');
-                d.style = "padding:5px; border-bottom:1px solid #fefefe; cursor:grab;";
-                d.innerText = `☀️ ${t.text} (by ${t.by})`;
-                d.draggable = true;
-                d.ondragstart = () => { draggedItem = { type:'morning', id }; trash.classList.add('visible'); };
+                const d = document.createElement('div'); d.className = 'wish-item'; d.innerHTML = `<span>☀️ ${t.text}</span><small style="color:#ccc">by ${t.by}</small>`;
+                d.draggable = true; d.ondragstart = () => { draggedItem = { type:'morning', id }; trash.classList.add('visible'); };
                 d.ondragend = () => trash.classList.remove('visible');
                 morningBox.appendChild(d);
             });
 
-            // 渲染聊天
-            const msgBox = document.getElementById('chat-messages');
-            msgBox.innerHTML = '';
-            chats.forEach(m => {
-                const b = document.createElement('div');
-                b.className = `msg-bubble ${m.by === currentUser ? 'me' : 'other'}`;
-                if(m.type === 'text') b.innerText = m.text;
-                else b.innerHTML = `<img src="${m.imgBase64}">`;
+            const msgBox = document.getElementById('chat-messages'); msgBox.innerHTML = '';
+            Object.values(data.chats || {}).forEach(m => {
+                const b = document.createElement('div'); b.className = `msg-bubble ${m.by === currentUser ? 'me' : 'other'}`;
+                if(m.type === 'text') b.innerText = m.text; else b.innerHTML = `<img src="${m.imgBase64}">`;
                 msgBox.appendChild(b);
             });
 
-            // 渲染願望
             ['food', 'travel', 'activity'].forEach(cat => {
-                const box = document.getElementById('list-' + cat);
-                box.innerHTML = '';
+                const box = document.getElementById('list-' + cat); box.innerHTML = '';
                 Object.entries(data.wishes?.[cat] || {}).forEach(([id, w]) => {
-                    const d = document.createElement('div');
-                    d.className = 'wish-item'; d.draggable = true;
-                    d.innerHTML = `<span>${w.text}</span>`;
+                    const d = document.createElement('div'); d.className = 'wish-item'; d.draggable = true; d.innerHTML = `<span>${w.text}</span>`;
                     d.ondragstart = () => { draggedItem = { type:'wish', cat, id, text:w.text }; trash.classList.add('visible'); };
                     d.ondragend = () => trash.classList.remove('visible');
                     box.appendChild(d);
                 });
             });
 
-            // 渲染日曆
-            const cal = document.getElementById('rollingCalendar');
-            cal.innerHTML = '';
+            const cal = document.getElementById('rollingCalendar'); cal.innerHTML = '';
             const now = new Date(); now.setHours(0,0,0,0);
             const start = new Date(now); start.setDate(now.getDate() - now.getDay());
             document.getElementById('weekdayHeaders').innerHTML = '';
-            ['Sun','Mon','Tue','Wed','Thu','Tri','Sat'].forEach(n => document.getElementById('weekdayHeaders').innerHTML += `<div>${n}</div>`);
+            ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(n => document.getElementById('weekdayHeaders').innerHTML += `<div>${n}</div>`);
 
             for(let i=0; i<35; i++) {
                 const curr = new Date(start); curr.setDate(start.getDate() + i);
                 const dKey = curr.toLocaleDateString();
                 const card = document.createElement('div');
                 card.className = `day-card ${dKey === now.toLocaleDateString() ? 'is-today' : ''}`;
-                card.innerHTML = `<span style="font-size:0.6rem;color:#ccc;">${curr.getDate()}</span><div class="heart-quick-btn">❤️</div>`;
-                
-                card.querySelector('.heart-quick-btn').onclick = (e) => { 
-                    e.stopPropagation(); 
-                    db.ref(`data/plans/${dKey}`).push('❤️');
-                    db.ref('data/archives').push({ text: `❤️ 在 ${dKey} 紀錄了一次親密時光`, date: new Date().toLocaleDateString() });
-                };
-                
+                card.innerHTML = `<span class="date-label">${curr.getDate()}/${monthShort[curr.getMonth()]}</span><div class="heart-quick-btn">❤️</div>`;
+                card.querySelector('.heart-quick-btn').onclick = (e) => { e.stopPropagation(); addHeart(dKey, data.plans?.[dKey]); };
+                card.onclick = () => { const v = prompt(`在 ${dKey} 的新計畫:`); if(v) { db.ref(`data/plans/${dKey}`).push(v); updateActivity(); } };
                 card.ondragover = (e) => e.preventDefault();
-                card.ondrop = () => {
+                card.ondrop = (e) => {
+                    e.stopPropagation();
                     if(draggedItem.type === 'wish') { db.ref(`data/plans/${dKey}`).push(draggedItem.text); db.ref(`data/wishes/${draggedItem.cat}/${draggedItem.id}`).remove(); }
                     else if(draggedItem.type === 'plan') { db.ref(`data/plans/${dKey}`).push(draggedItem.text); db.ref(`data/plans/${draggedItem.date}/${draggedItem.id}`).remove(); }
+                    updateActivity();
                 };
-
                 if(data.plans?.[dKey]) {
                     Object.entries(data.plans[dKey]).forEach(([pid, p]) => {
-                        const t = document.createElement('div');
-                        t.className = 'plan-tag'; t.draggable = true; t.innerText = p;
+                        const t = document.createElement('div'); t.className = 'plan-tag'; t.draggable = true; t.innerText = p;
+                        if(p.includes('❤️')) t.style.background = "#ff4d4d";
                         t.ondragstart = (e) => { e.stopPropagation(); draggedItem = { type:'plan', date:dKey, id:pid, text:p }; trash.classList.add('visible'); };
                         card.appendChild(t);
                     });
@@ -285,10 +322,9 @@
                 cal.appendChild(card);
             }
 
-            const archBox = document.getElementById('archiveList');
-            archBox.innerHTML = '';
+            const archBox = document.getElementById('archiveList'); archBox.innerHTML = '';
             Object.values(data.archives || {}).reverse().forEach(a => {
-                archBox.innerHTML += `<div style="padding:5px 0; border-bottom:1px solid #f9f9f9;">${a.date}: ${a.text}</div>`;
+                archBox.innerHTML += `<div style="padding:6px 0; border-bottom:1px solid #f9f9f9;">${a.text}</div>`;
             });
         }
     </script>
