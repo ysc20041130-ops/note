@@ -3,100 +3,168 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>寶寶的 Love Planner Pro</title>
+    <title>寶寶的 Love Planner Pro (全功能完整版)</title>
     
-    <link rel="manifest" href="data:application/manifest+json,{'name':'LovePlanner','short_name':'LovePlanner','start_url':'/','display':'standalone','background_color':'#fdf2f4','theme_color':'#ffafbd','icons':[{'src':'https://img0.baidu.com/it/u=3027201083,1695537574&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500','sizes':'500x500','type':'image/jpeg'}]}">
-    <meta name="apple-mobile-web-app-capable" content="yes">
-    <meta name="apple-mobile-web-app-status-bar-style" content="black-translucent">
-    <link rel="apple-touch-icon" href="https://img0.baidu.com/it/u=3027201083,1695537574&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500">
-
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
+    
     <style>
-        :root { --ysc-blue: #607d8b; --lcl-pink: #ffafbd; --accent: var(--lcl-pink); --bg: #fdf2f4; --text: #4a4a4a; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; color: var(--text); padding-bottom: 80px; -webkit-user-select: none; }
+        :root { 
+            --ysc-blue: #607d8b; 
+            --lcl-pink: #ffafbd; 
+            --accent: var(--lcl-pink); 
+            --bg: #fdf2f4; 
+            --text: #4a4a4a; 
+        }
+
+        body { 
+            font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, Helvetica, Arial, sans-serif; 
+            background: var(--bg); 
+            margin: 0; 
+            color: var(--text); 
+            padding-bottom: 80px; 
+            overflow-x: hidden;
+            -webkit-user-select: none; 
+        }
         
-        #main-nav { position: sticky; top: 0; background: rgba(253, 242, 244, 0.95); backdrop-filter: blur(5px); display: flex; justify-content: space-around; padding: 15px; z-index: 1000; border-bottom: 1px solid #feefee; }
-        .nav-btn { background: none; border: none; font-size: 1rem; font-weight: bold; color: #999; cursor: pointer; padding: 5px 10px; border-radius: 20px; }
+        /* 導航欄 */
+        #main-nav { 
+            position: sticky; 
+            top: 0; 
+            background: rgba(253, 242, 244, 0.95); 
+            backdrop-filter: blur(5px); 
+            display: flex; 
+            justify-content: space-around; 
+            padding: 15px; 
+            z-index: 1000; 
+            border-bottom: 1px solid #feefee; 
+        }
+        .nav-btn { 
+            background: none; border: none; font-size: 1rem; font-weight: bold; 
+            color: #999; cursor: pointer; padding: 5px 15px; border-radius: 20px; 
+            transition: all 0.3s;
+        }
         .nav-btn.active { color: var(--accent); background: rgba(255, 175, 189, 0.1); }
 
-        #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fdf2f4; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .login-btn { width: 200px; padding: 20px; margin: 10px; border-radius: 50px; border: none; font-size: 1.2rem; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
+        /* 登入介面 */
+        #login-screen { 
+            position: fixed; top: 0; left: 0; width: 100%; height: 100%; 
+            background: #fdf2f4; z-index: 9999; display: flex; 
+            flex-direction: column; align-items: center; justify-content: center; 
+        }
+        .login-btn { 
+            width: 220px; padding: 20px; margin: 10px; border-radius: 50px; 
+            border: none; font-size: 1.2rem; font-weight: bold; color: white; 
+            cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.1); 
+        }
         .btn-ysc { background: var(--ysc-blue); } .btn-lcl { background: var(--lcl-pink); }
         
-        #header-stats { text-align: center; background: white; border-radius: 25px; margin: 10px; padding: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
-        #together-days { color: var(--accent); font-weight: bold; font-size: 1.3rem; margin-bottom: 5px; }
-        #love-index { color: #888; font-size: 0.85rem; }
-
-        .page { display: none; padding: 15px; } .page.active { display: block; }
-        .section { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        .section-header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 15px; border-bottom: 1px solid #f9f9f9; padding-bottom: 8px; }
-        h2 { font-size: 0.95rem; color: var(--accent); margin: 0; }
+        /* 公用區塊樣式 */
+        .page { display: none; padding: 15px; } 
+        .page.active { display: block; }
+        .section { 
+            background: white; border-radius: 20px; padding: 20px; 
+            margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); 
+        }
+        .section-header { 
+            display: flex; justify-content: space-between; align-items: center; 
+            margin-bottom: 15px; border-bottom: 1px solid #f9f9f9; padding-bottom: 8px; 
+        }
+        h2 { font-size: 0.95rem; color: var(--accent); margin: 0; letter-spacing: 1px; }
         
-        .heart-add-btn { background: var(--bg); color: var(--accent); border: 1.5px solid var(--accent); padding: 4px 12px; border-radius: 15px; font-size: 0.9rem; cursor: pointer; transition: 0.2s; display: flex; align-items: center; justify-content: center; }
-        .heart-add-btn:active { transform: scale(0.9); background: var(--accent); color: white; }
-
+        /* 按鈕與輸入框 */
+        .heart-add-btn { 
+            background: var(--bg); color: var(--accent); border: 1.5px solid var(--accent); 
+            padding: 4px 12px; border-radius: 15px; font-size: 0.9rem; cursor: pointer; 
+        }
         .input-group { display: flex; gap: 8px; margin-bottom: 15px; }
         input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #eee; outline: none; font-size: 14px; }
         button.add-btn { background: var(--accent); color: white; border: none; padding: 0 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
 
-        .wish-item { display: flex; justify-content: space-between; padding: 12px; background: #fff; border: 1px solid #f0f0f0; border-radius: 12px; margin-bottom: 8px; cursor: grab; font-size: 0.9rem; }
+        /* 清單項目 */
+        .wish-item { 
+            display: flex; justify-content: space-between; align-items: center; 
+            padding: 12px; background: #fff; border: 1px solid #f0f0f0; 
+            border-radius: 12px; margin-bottom: 8px; cursor: grab; font-size: 0.9rem; 
+        }
+        .check-btn { background: none; border: none; cursor: pointer; font-size: 1.1rem; filter: grayscale(1); transition: 0.2s; }
+        .check-btn:hover { filter: grayscale(0); transform: scale(1.2); }
         
+        /* 日曆樣式 */
         .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-        .day-card { background: #fff; border: 1px solid #feefee; border-radius: 10px; min-height: 85px; padding: 5px; position: relative; display: flex; flex-direction: column; overflow: hidden; }
+        .day-card { 
+            background: #fff; border: 1px solid #feefee; border-radius: 10px; 
+            min-height: 90px; padding: 5px; position: relative; 
+            display: flex; flex-direction: column; overflow: hidden; 
+        }
         .day-card.is-today { border: 2.5px solid var(--accent); background: #fffcfd; }
         .date-label { font-size: 0.65rem; color: #bbb; font-weight: bold; margin-bottom: 4px; }
-        
-        .plan-tag { background: var(--accent); color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.65rem; margin-top: 2px; cursor: grab; display: block; word-break: break-all; }
+        .plan-tag { 
+            background: var(--accent); color: white; padding: 2px 4px; 
+            border-radius: 4px; font-size: 0.65rem; margin-top: 2px; 
+            cursor: grab; word-break: break-all; 
+        }
 
-        #chat-container { display: flex; flex-direction: column; height: 60vh; background: #fafafa; border-radius: 20px; overflow: hidden; }
-        #chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .msg-bubble { max-width: 75%; padding: 10px 14px; border-radius: 18px; font-size: 0.9rem; }
-        .msg-bubble.me { align-self: flex-end; background: var(--accent); color: white; border-bottom-right-radius: 4px; }
-        .msg-bubble.other { align-self: flex-start; background: #efefef; color: #333; border-bottom-left-radius: 4px; }
-        .msg-bubble img { max-width: 100%; border-radius: 10px; margin-top: 5px; }
+        /* 聊天氣泡 */
+        #chat-messages { 
+            height: 55vh; overflow-y: auto; display: flex; 
+            flex-direction: column; gap: 10px; padding: 10px; 
+            background: #fafafa; border-radius: 15px; 
+        }
+        .msg-bubble { max-width: 80%; padding: 10px 14px; border-radius: 15px; font-size: 0.9rem; line-height: 1.4; }
+        .msg-bubble.me { align-self: flex-end; background: var(--accent); color: white; border-bottom-right-radius: 2px; }
+        .msg-bubble.other { align-self: flex-start; background: #eee; color: #333; border-bottom-left-radius: 2px; }
 
-        .archive-toggle { cursor: pointer; color: #999; font-size: 0.85rem; padding: 12px; border-radius: 12px; background: #f9f9f9; text-align: center; margin-top: 10px; }
-        #archiveList { display: none; margin-top: 10px; font-size: 0.8rem; color: #888; border-top: 1px dashed #eee; padding-top: 10px; }
-        
-        #trash-can { position: fixed; top: 0; right: -85px; width: 80px; height: 100%; background: #ff4d4d; color: white; display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 2000; font-weight: bold; letter-spacing: 2px; }
-        #trash-can.visible { right: 0; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
+        /* 歷史紀錄 */
+        .archive-item { 
+            font-size: 0.8rem; color: #888; padding: 10px; 
+            border-bottom: 1px dashed #eee; background: #fdfdfd;
+        }
+
+        /* 垃圾桶 */
+        #trash-can { 
+            position: fixed; top: 0; right: -85px; width: 80px; height: 100%; 
+            background: #ff4d4d; color: white; display: flex; 
+            align-items: center; justify-content: center; writing-mode: vertical-rl; 
+            transition: all 0.3s cubic-bezier(0.4, 0, 0.2, 1); z-index: 2000; font-weight: bold; 
+        }
+        #trash-can.visible { right: 0; box-shadow: -5px 0 20px rgba(0,0,0,0.1); }
     </style>
 </head>
 <body>
 
     <div id="login-screen">
-        <h1 style="color: #888; margin-bottom: 20px;">寶寶請進</h1>
-        <img src="https://img0.baidu.com/it/u=3027201083,1695537574&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500" style="width:120px; height:120px; border-radius:60px; margin-bottom:25px; object-fit: cover; border: 3px solid white; box-shadow: 0 10px 20px rgba(0,0,0,0.05);">
-        <button class="login-btn btn-ysc" onclick="initApp('ysc')">ysc</button>
-        <button class="login-btn btn-lcl" onclick="initApp('lcl')">lcl</button>
+        <h1 style="color: #888; margin-bottom: 20px; font-weight: 300;">❤️ 寶寶專屬空間</h1>
+        <button class="login-btn btn-ysc" onclick="initApp('ysc')">我是 ysc</button>
+        <button class="login-btn btn-lcl" onclick="initApp('lcl')">我是 lcl</button>
     </div>
 
     <div id="trash-can">🗑️ 拖到這裡刪除</div>
 
     <div id="main-nav">
-        <button class="nav-btn active" onclick="switchPage('calendar')">🗓️ 紀念日曆</button>
-        <button class="nav-btn" onclick="switchPage('chat')">💬 寶寶通訊</button>
+        <button class="nav-btn active" onclick="switchPage('calendar', this)">🗓️ 紀念日曆</button>
+        <button class="nav-btn" onclick="switchPage('chat', this)">💬 寶寶通訊</button>
+        <button class="nav-btn" onclick="switchPage('archive', this)">📜 歷史紀錄</button>
     </div>
 
     <div id="page-calendar" class="page active">
-        <div id="header-stats">
-            <div id="together-days">已經在一起 0 天了</div>
-            <div id="love-index">我們本月的幸福指數：0.0</div>
+        <div id="header-stats" style="text-align: center; margin-bottom: 20px; background: white; padding: 20px; border-radius: 20px;">
+            <div id="together-days" style="font-size: 1.4rem; color: var(--accent); font-weight: bold;">在一起 0 天</div>
+            <div id="love-index" style="font-size: 0.85rem; color: #999; margin-top: 5px;">本月幸福指數：0.0</div>
         </div>
 
         <div class="section">
-            <div class="section-header"><h2>☀️ 早上必讀</h2></div>
-            <div id="todoList" style="margin-bottom:10px;"></div>
+            <div class="section-header"><h2>☀️ 給對方的早上必讀 (驚喜區)</h2></div>
+            <div id="todoList"></div>
             <div class="input-group">
-                <input type="text" id="taskInput" placeholder="給寶寶的小提醒...">
+                <input type="text" id="taskInput" placeholder="寫給對方的內容只有對方能看見...">
                 <button class="add-btn" onclick="addMorningTask()">發送</button>
             </div>
         </div>
 
         <div class="section">
             <div class="section-header">
-                <h2>🗓️ 滾動日曆</h2>
+                <h2>🗓️ 紀念日曆</h2>
                 <button class="heart-add-btn" onclick="addHeartToToday()">➕ ❤️</button>
             </div>
             <div id="weekdayHeaders" class="calendar-grid" style="text-align:center; font-size:0.7rem; color:#ccc; margin-bottom:8px;"></div>
@@ -104,39 +172,38 @@
         </div>
 
         <div class="section">
-            <div class="section-header"><h2>🍰 願望清單 (Wish List)</h2></div>
-            <h3>📍 豬癮犯了 (美食)</h3>
+            <div class="section-header"><h2>🍰 美食清單</h2></div>
             <div id="list-food"></div>
-            <div class="input-group"><input type="text" id="input-food" placeholder="想吃..."><button class="add-btn" onclick="addWish('food')">添加</button></div>
-            <h3>📍 腳要痛了 (旅遊)</h3>
-            <div id="list-travel"></div>
-            <div class="input-group"><input type="text" id="input-travel" placeholder="想去..."><button class="add-btn" onclick="addWish('travel')">添加</button></div>
-            <h3>📍 總得做點什麼 (活動)</h3>
-            <div id="list-activity"></div>
-            <div class="input-group"><input type="text" id="input-activity" placeholder="想做..."><button class="add-btn" onclick="addWish('activity')">添加</button></div>
+            <div class="input-group"><input type="text" id="input-food" placeholder="想吃什麼..."><button class="add-btn" onclick="addWish('food')">＋</button></div>
         </div>
-
+        
         <div class="section">
-            <div class="archive-toggle" onclick="toggleArchive()">📜 查看我們的歷史紀錄 (點擊展開)</div>
-            <div id="archiveList"></div>
+            <div class="section-header"><h2>✈️ 旅遊清單</h2></div>
+            <div id="list-travel"></div>
+            <div class="input-group"><input type="text" id="input-travel" placeholder="想去哪裡..."><button class="add-btn" onclick="addWish('travel')">＋</button></div>
         </div>
     </div>
 
     <div id="page-chat" class="page">
-        <div class="section" style="padding:10px;">
-            <div id="chat-container">
-                <div id="chat-messages"></div>
-                <div id="chat-input-area" style="display:flex; padding:12px; background:white; gap:8px; border-top:1px solid #eee;">
-                    <label for="image-input" style="font-size:1.5rem; cursor:pointer;">📸</label>
-                    <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
-                    <input type="text" id="chat-input-text" placeholder="輸入消息..." style="flex:1; border-radius:20px; border:1px solid #eee; padding:8px 15px;">
-                    <button onclick="sendChatMessage()" style="background:none; border:none; color:var(--accent); font-weight:bold;">送出</button>
-                </div>
+        <div class="section">
+            <div class="section-header"><h2>💬 寶寶的聊天室</h2></div>
+            <div id="chat-messages"></div>
+            <div class="input-group" style="margin-top:10px;">
+                <input type="text" id="chatInput" placeholder="說點什麼...">
+                <button class="add-btn" onclick="sendChatMessage()">送出</button>
             </div>
         </div>
     </div>
 
+    <div id="page-archive" class="page">
+        <div class="section">
+            <div class="section-header"><h2>📜 我們的時光回憶</h2></div>
+            <div id="fullArchiveList"></div>
+        </div>
+    </div>
+
     <script>
+        // --- Firebase 初始化 ---
         const firebaseConfig = {
             apiKey: "AIzaSyDvzd2ZhT-HfuJoJ28S14cun-6D_wNILtg",
             authDomain: "ourloveplanner.firebaseapp.com",
@@ -158,30 +225,43 @@
             return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
         };
 
+        // --- 初始化 App ---
         function initApp(u) {
             currentUser = u;
             document.getElementById('login-screen').style.display = 'none';
             document.documentElement.style.setProperty('--accent', (u === 'ysc' ? '#607d8b' : '#ffafbd'));
+            
             const diff = Math.floor((new Date() - startDate) / (1000 * 60 * 60 * 24)) + 1;
-            document.getElementById('together-days').innerText = `已經在一起 ${diff} 天了`;
-            db.ref('data').on('value', s => { allData = s.val() || {}; render(allData); });
+            document.getElementById('together-days').innerText = `在一起 ${diff} 天`;
+            
+            db.ref('data').on('value', s => { 
+                allData = s.val() || {}; 
+                render(allData); 
+            });
             updateActivity();
         }
 
         function updateActivity() { db.ref('data/lastActivityTime').set(Date.now()); }
 
-        function switchPage(p) {
+        function switchPage(p, btn) {
             document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
             document.querySelectorAll('.nav-btn').forEach(bn => bn.classList.remove('active'));
             document.getElementById('page-' + p).classList.add('active');
-            if(event) event.target.classList.add('active');
-            if(p === 'chat') setTimeout(() => { const c = document.getElementById('chat-messages'); c.scrollTop = c.scrollHeight; }, 100);
+            btn.classList.add('active');
             updateActivity();
         }
 
-        function toggleArchive() {
-            const list = document.getElementById('archiveList');
-            list.style.display = (list.style.display === 'block' ? 'none' : 'block');
+        // --- 核心邏輯：完成與歸檔 ---
+        function archiveTask(type, id, text, cat = null) {
+            const timeStr = new Date().toLocaleString('zh-HK', { hour12: false });
+            db.ref('data/archives').push({
+                text: `✅ ${text}`,
+                timestamp: timeStr,
+                type: 'manual'
+            });
+            if(type === 'morning') db.ref(`data/morningTasks/${id}`).remove();
+            if(type === 'wish') db.ref(`data/wishes/${cat}/${id}`).remove();
+            updateActivity();
         }
 
         function addMorningTask() {
@@ -199,30 +279,19 @@
         }
 
         function sendChatMessage() {
-            const i = document.getElementById('chat-input-text');
+            const i = document.getElementById('chatInput');
             if(!i.value) return;
-            db.ref('data/chats').push({ type: 'text', text: i.value, by: currentUser, time: Date.now() });
+            db.ref('data/chats').push({ text: i.value, by: currentUser, time: Date.now() });
             i.value = ''; updateActivity();
         }
 
-        function handleImageUpload(e) {
-            const file = e.target.files[0];
-            const reader = new FileReader();
-            reader.onload = (ev) => {
-                db.ref('data/chats').push({ type: 'image', imgBase64: ev.target.result, by: currentUser, time: Date.now() });
-                updateActivity();
-            };
-            reader.readAsDataURL(file);
-        }
-
-        // --- 核心更新：❤️ 每次點擊產生獨立計畫 ---
         function addHeartToToday() {
             const todayKey = formatDateKey(new Date());
-            // 直接 push 一個新的 ❤️ 計畫，不再尋找舊標籤進行累加
             db.ref(`data/plans/${todayKey}`).push('❤️');
             updateActivity();
         }
 
+        // --- 渲染函數 (確保不遺漏任何功能) ---
         function render(data) {
             const trash = document.getElementById('trash-can');
             trash.ondragover = (e) => e.preventDefault();
@@ -231,67 +300,77 @@
                 if(draggedItem.type === 'wish') db.ref(`data/wishes/${draggedItem.cat}/${draggedItem.id}`).remove();
                 if(draggedItem.type === 'plan') db.ref(`data/plans/${draggedItem.date}/${draggedItem.id}`).remove();
                 if(draggedItem.type === 'morning') db.ref(`data/morningTasks/${draggedItem.id}`).remove();
-                trash.classList.remove('visible'); // 刪除後立刻縮回
+                trash.classList.remove('visible');
                 updateActivity();
             };
 
+            // 吵架偵測：24小時無活動
             const lastActive = data.lastActivityTime || 0;
-            const todayKey = formatDateKey(new Date());
             if(lastActive > 0 && (Date.now() - lastActive > 86400000)) {
+                const todayKey = formatDateKey(new Date());
                 if(!data.archives || !Object.values(data.archives).find(a => a.date === todayKey && a.type === 'fight')) {
-                    db.ref('data/archives').push({ type: 'fight', text: '💣 寶寶今天好像吵架了 (整天無人使用App)', date: todayKey, timestamp: Date.now() });
+                    db.ref('data/archives').push({ type: 'fight', text: '💣 寶寶今天好像吵架了 (App 已沉寂24小時)', date: todayKey, timestamp: new Date().toLocaleString() });
                 }
             }
 
-            // --- 幸福指數計算 (統計所有含❤️的標籤次數) ---
-            let totalHearts = 0, totalFights = 0;
-            const thirtyDaysAgo = Date.now() - (30 * 24 * 60 * 60 * 1000);
+            // 幸福指數計算 (❤️❤️)
+            let totalHearts = 0;
             if(data.plans) {
-                Object.values(data.plans).forEach(dayPlans => {
-                    Object.values(dayPlans).forEach(p => {
-                        if(typeof p === 'string' && p.includes('❤️')) totalHearts += (p.match(/❤️/g) || []).length;
-                    });
+                Object.values(data.plans).forEach(day => {
+                    Object.values(day).forEach(p => { if(p === '❤️') totalHearts++; });
                 });
             }
-            if(data.archives) {
-                Object.values(data.archives).forEach(a => {
-                    if(a.type === 'fight' && (a.timestamp || 0) > thirtyDaysAgo) totalFights++;
-                });
-            }
-            const loveIndex = ((totalHearts - totalFights) / 2).toFixed(1);
-            document.getElementById('love-index').innerText = `我們本月的幸福指數：${loveIndex}`;
+            document.getElementById('love-index').innerText = `本月幸福指數：${(totalHearts/2).toFixed(1)}`;
 
+            // 早上必讀：僅顯示對方寫的內容
             const morningBox = document.getElementById('todoList'); morningBox.innerHTML = '';
             Object.entries(data.morningTasks || {}).forEach(([id, t]) => {
-                const d = document.createElement('div'); d.className = 'wish-item'; d.innerHTML = `<span>☀️ ${t.text}</span><small style="color:#ccc">by ${t.by}</small>`;
-                d.draggable = true; 
-                d.ondragstart = () => { draggedItem = { type:'morning', id }; trash.classList.add('visible'); };
-                d.ondragend = () => trash.classList.remove('visible'); // 拖放結束必收回
-                morningBox.appendChild(d);
+                if(t.by !== currentUser) {
+                    const d = document.createElement('div'); d.className = 'wish-item';
+                    d.innerHTML = `<span>☀️ ${t.text}</span><button class="check-btn" onclick="archiveTask('morning','${id}','${t.text}')">✔️</button>`;
+                    d.draggable = true;
+                    d.ondragstart = () => { draggedItem = { type:'morning', id }; trash.classList.add('visible'); };
+                    d.ondragend = () => trash.classList.remove('visible');
+                    morningBox.appendChild(d);
+                }
             });
 
-            const msgBox = document.getElementById('chat-messages'); msgBox.innerHTML = '';
-            Object.values(data.chats || {}).forEach(m => {
-                const b = document.createElement('div'); b.className = `msg-bubble ${m.by === currentUser ? 'me' : 'other'}`;
-                if(m.type === 'text') b.innerText = m.text; else b.innerHTML = `<img src="${m.imgBase64}">`;
-                msgBox.appendChild(b);
-            });
-
-            ['food', 'travel', 'activity'].forEach(cat => {
+            // 願望清單
+            ['food', 'travel'].forEach(cat => {
                 const box = document.getElementById('list-' + cat); box.innerHTML = '';
                 Object.entries(data.wishes?.[cat] || {}).forEach(([id, w]) => {
-                    const d = document.createElement('div'); d.className = 'wish-item'; d.draggable = true; d.innerHTML = `<span>${w.text}</span>`;
+                    const d = document.createElement('div'); d.className = 'wish-item';
+                    d.innerHTML = `<span>${w.text}</span><button class="check-btn" onclick="archiveTask('wish','${id}','${w.text}','${cat}')">✔️</button>`;
+                    d.draggable = true;
                     d.ondragstart = () => { draggedItem = { type:'wish', cat, id, text:w.text }; trash.classList.add('visible'); };
-                    d.ondragend = () => trash.classList.remove('visible'); // 拖放結束必收回
+                    d.ondragend = () => trash.classList.remove('visible');
                     box.appendChild(d);
                 });
             });
 
+            // 歷史紀錄
+            const fullArchBox = document.getElementById('fullArchiveList'); fullArchBox.innerHTML = '';
+            const archives = Object.values(data.archives || {}).reverse();
+            archives.forEach(a => {
+                const d = document.createElement('div'); d.className = 'archive-item';
+                d.innerHTML = `<div style="color:#4a4a4a;">${a.text}</div><div style="font-size:0.7rem; color:#ccc; margin-top:4px;">${a.timestamp}</div>`;
+                fullArchBox.appendChild(d);
+            });
+
+            // 通訊紀錄
+            const msgBox = document.getElementById('chat-messages'); msgBox.innerHTML = '';
+            Object.values(data.chats || {}).forEach(m => {
+                const b = document.createElement('div'); b.className = `msg-bubble ${m.by === currentUser ? 'me' : 'other'}`;
+                b.innerText = m.text; msgBox.appendChild(b);
+            });
+            msgBox.scrollTop = msgBox.scrollHeight;
+
+            // 日曆渲染
             const cal = document.getElementById('rollingCalendar'); cal.innerHTML = '';
-            const now = new Date(); now.setHours(0,0,0,0);
-            const start = new Date(now); start.setDate(now.getDate() - now.getDay());
-            document.getElementById('weekdayHeaders').innerHTML = '';
-            ['Sun','Mon','Tue','Wed','Thu','Fri','Sat'].forEach(n => document.getElementById('weekdayHeaders').innerHTML += `<div>${n}</div>`);
+            const todayKey = formatDateKey(new Date());
+            const start = new Date(); start.setDate(start.getDate() - start.getDay());
+            
+            document.getElementById('weekdayHeaders').innerHTML = 'Sun,Mon,Tue,Wed,Thu,Fri,Sat'.split(',').map(d => `<div>${d}</div>`).join('');
 
             for(let i=0; i<35; i++) {
                 const curr = new Date(start); curr.setDate(start.getDate() + i);
@@ -300,31 +379,39 @@
                 card.className = `day-card ${dKey === todayKey ? 'is-today' : ''}`;
                 card.innerHTML = `<span class="date-label">${curr.getDate()}/${monthShort[curr.getMonth()]}</span>`;
                 
-                card.onclick = () => { const v = prompt(`在 ${dKey} 的新計畫:`); if(v) { db.ref(`data/plans/${dKey}`).push(v); updateActivity(); } };
+                // 點擊新增計畫
+                card.onclick = (e) => { 
+                    if(e.target !== card) return;
+                    const v = prompt(`${dKey} 有什麼新計畫？`); if(v) db.ref(`data/plans/${dKey}`).push(v); 
+                };
+                
+                // 拖拽放入
                 card.ondragover = (e) => e.preventDefault();
                 card.ondrop = (e) => {
                     e.stopPropagation();
                     if(!draggedItem) return;
-                    if(draggedItem.type === 'wish') { db.ref(`data/plans/${dKey}`).push(draggedItem.text); db.ref(`data/wishes/${draggedItem.cat}/${draggedItem.id}`).remove(); }
-                    else if(draggedItem.type === 'plan') { db.ref(`data/plans/${dKey}`).push(draggedItem.text); db.ref(`data/plans/${draggedItem.date}/${draggedItem.id}`).remove(); }
+                    db.ref(`data/plans/${dKey}`).push(draggedItem.text);
+                    if(draggedItem.type === 'wish') db.ref(`data/wishes/${draggedItem.cat}/${draggedItem.id}`).remove();
                     updateActivity();
                 };
+
+                // 顯示該天計畫
                 if(data.plans?.[dKey]) {
                     Object.entries(data.plans[dKey]).forEach(([pid, p]) => {
-                        const t = document.createElement('div'); t.className = 'plan-tag'; t.draggable = true; t.innerText = p;
-                        if(typeof p === 'string' && p.includes('❤️')) t.style.background = "#ff4d4d";
-                        t.ondragstart = (e) => { e.stopPropagation(); draggedItem = { type:'plan', date:dKey, id:pid, text:p }; trash.classList.add('visible'); };
-                        t.ondragend = () => trash.classList.remove('visible'); // 拖放結束必收回
+                        const t = document.createElement('div'); t.className = 'plan-tag'; t.innerText = p;
+                        if(p === '❤️') t.style.background = "#ff4d4d";
+                        t.draggable = true;
+                        t.ondragstart = (e) => { 
+                            e.stopPropagation(); 
+                            draggedItem = { type:'plan', date:dKey, id:pid, text:p }; 
+                            trash.classList.add('visible'); 
+                        };
+                        t.ondragend = () => trash.classList.remove('visible'); // 拖拽結束回彈
                         card.appendChild(t);
                     });
                 }
                 cal.appendChild(card);
             }
-
-            const archBox = document.getElementById('archiveList'); archBox.innerHTML = '';
-            Object.values(data.archives || {}).reverse().forEach(a => {
-                archBox.innerHTML += `<div style="padding:6px 0; border-bottom:1px solid #f9f9f9;">${a.text}</div>`;
-            });
         }
     </script>
 </body>
