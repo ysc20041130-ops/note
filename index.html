@@ -14,59 +14,45 @@
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     <style>
         :root { --ysc-blue: #607d8b; --lcl-pink: #ffafbd; --accent: var(--lcl-pink); --bg: #fdf2f4; --text: #4a4a4a; }
-        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; color: var(--text); padding-bottom: 80px; -webkit-tap-highlight-color: transparent; }
+        body { font-family: -apple-system, sans-serif; background: var(--bg); margin: 0; color: var(--text); padding-bottom: 80px; }
         
-        /* 1. 全局导航栏 */
         #main-nav { position: sticky; top: 0; background: rgba(253, 242, 244, 0.95); backdrop-filter: blur(5px); display: flex; justify-content: space-around; padding: 15px; z-index: 1000; border-bottom: 1px solid #feefee; }
-        .nav-btn { background: none; border: none; font-size: 1rem; font-weight: bold; color: #999; cursor: pointer; transition: 0.2s; padding: 5px 10px; border-radius: 20px; }
+        .nav-btn { background: none; border: none; font-size: 1rem; font-weight: bold; color: #999; cursor: pointer; padding: 5px 10px; border-radius: 20px; }
         .nav-btn.active { color: var(--accent); background: rgba(255, 175, 189, 0.1); }
 
-        /* 2. 匿名即时通知横幅 */
-        #web-notification { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: rgba(255, 255, 255, 0.95); color: #333; padding: 15px 20px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 10000; display: flex; align-items: center; justify-content: center; font-weight: bold; font-size: 0.9rem; transition: 0.5s ease; border: 2px solid var(--accent); }
+        #web-notification { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: white; padding: 15px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 10000; text-align: center; font-weight: bold; transition: 0.5s ease; border: 2px solid var(--accent); }
         #web-notification.show { top: 20px; }
 
-        /* 3. 登录与正数日历 */
         #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fdf2f4; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
-        .login-btn { width: 200px; padding: 20px; margin: 15px; border-radius: 50px; border: none; font-size: 1.2rem; font-weight: bold; color: white; cursor: pointer; box-shadow: 0 4px 15px rgba(0,0,0,0.1); }
-        .btn-ysc { background-color: var(--ysc-blue); } .btn-lcl { background-color: var(--lcl-pink); }
-        #together-days { text-align: center; color: var(--accent); font-weight: bold; font-size: 1.2rem; padding: 15px; background: rgba(255,255,255,0.5); border-radius: 15px; margin: 10px 0; }
+        .login-btn { width: 200px; padding: 20px; margin: 10px; border-radius: 50px; border: none; font-size: 1.2rem; font-weight: bold; color: white; cursor: pointer; }
+        .btn-ysc { background: var(--ysc-blue); } .btn-lcl { background: var(--lcl-pink); }
+        #together-days { text-align: center; color: var(--accent); font-weight: bold; font-size: 1.3rem; padding: 20px; background: white; border-radius: 20px; margin: 10px; box-shadow: 0 4px 15px rgba(0,0,0,0.03); }
 
-        /* 4. 通用样式 */
         .page { display: none; padding: 15px; } .page.active { display: block; }
         .section { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
-        h2 { font-size: 1rem; color: var(--accent); margin-top: 0; border-bottom: 2px solid var(--bg); padding-bottom: 10px; }
-        h3 { font-size: 0.8rem; color: #888; margin: 15px 0 5px 0; }
+        h2 { font-size: 1rem; color: var(--accent); margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
         
-        .input-group { display: flex; gap: 8px; margin-bottom: 15px; }
-        input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #eee; outline: none; font-size: 16px; }
-        button.add-btn { background: var(--accent); color: white; border: none; padding: 0 15px; border-radius: 12px; font-weight: bold; cursor: pointer; }
+        /* 日曆格子的愛心按鈕 */
+        .day-card { background: #fff; border: 1px solid #feefee; border-radius: 10px; min-height: 75px; padding: 5px; position: relative; }
+        .heart-quick-btn { position: absolute; bottom: 2px; right: 2px; font-size: 0.8rem; cursor: pointer; opacity: 0.3; transition: 0.3s; }
+        .heart-quick-btn:hover { opacity: 1; transform: scale(1.2); }
+        .day-card.is-today { border: 2px solid var(--accent); }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
+        .plan-tag { background: var(--accent); color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.65rem; margin-top: 2px; cursor: grab; }
 
-        /* 5. 日历与拖拽样式 */
-        .wish-item { display: flex; justify-content: space-between; padding: 10px; background: #fff; border: 1px solid #f0f0f0; border-radius: 10px; margin-bottom: 5px; cursor: grab; font-size: 0.85rem; }
-        .plan-tag { background: var(--accent); color: white; padding: 2px 5px; border-radius: 4px; font-size: 0.65rem; margin-top: 2px; cursor: grab; display: block; word-break: break-all; }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 4px; }
-        .day-card { background: #fff; border: 1px solid #feefee; border-radius: 8px; min-height: 60px; padding: 4px; display: flex; flex-direction: column; position: relative; overflow: hidden; }
-        .day-card.drag-over { background: #fff0f3; border: 2px dashed var(--accent); }
-        .day-card.is-today { border: 2px solid var(--accent); background: #fffcfd; }
-        .date-label { font-size: 0.6rem; font-weight: bold; color: #bbb; pointer-events: none; }
-        #trash-can { position: fixed; top: 0; right: -80px; width: 80px; height: 100%; background: #ff4d4d; color: white; display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; text-orientation: mixed; font-weight: bold; transition: 0.3s; z-index: 1000; box-shadow: -5px 0 15px rgba(0,0,0,0.1); }
+        /* 通訊界面 */
+        #chat-container { display: flex; flex-direction: column; height: 60vh; background: #fafafa; border-radius: 20px; overflow: hidden; }
+        #chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
+        .msg-bubble { max-width: 75%; padding: 8px 12px; border-radius: 15px; font-size: 0.9rem; position: relative; }
+        .msg-bubble.me { align-self: flex-end; background: var(--accent); color: white; }
+        .msg-bubble.other { align-self: flex-start; background: #eee; color: #333; }
+        .msg-bubble img { max-width: 100%; border-radius: 10px; margin-top: 5px; }
+
+        /* 可折疊歷史紀錄 */
+        .archive-toggle { cursor: pointer; color: #999; font-size: 0.85rem; padding: 10px; border-radius: 10px; background: #f9f9f9; text-align: center; margin-top: 10px; }
+        #archiveList { display: none; margin-top: 10px; font-size: 0.8rem; color: #888; border-top: 1px dashed #eee; padding-top: 10px; }
+        #trash-can { position: fixed; top: 0; right: -80px; width: 80px; height: 100%; background: #ff4d4d; color: white; display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; transition: 0.3s; z-index: 1000; }
         #trash-can.visible { right: 0; }
-        .archive-list { font-size: 0.7rem; color: #999; max-height: 100px; overflow-y: auto; }
-
-        /* 6. 通讯 (Instagram 聊天风) */
-        #chat-container { display: flex; flex-direction: column; height: calc(100vh - 150px); background: #fafafa; border-radius: 20px; overflow: hidden; }
-        #chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column-reverse; gap: 10px; }
-        .msg-bubble { max-width: 75%; padding: 10px 15px; border-radius: 20px; font-size: 0.9rem; position: relative; word-wrap: break-word; }
-        .msg-bubble.me { align-self: flex-end; background-color: var(--accent); color: white; border-bottom-right-radius: 5px; }
-        .msg-bubble.other { align-self: flex-start; background-color: #efefef; color: #333; border-bottom-left-radius: 5px; }
-        .msg-bubble img { max-width: 100%; border-radius: 15px; margin-top: 5px; display: block; }
-        .msg-time { font-size: 0.6rem; color: rgba(0,0,0,0.3); margin-top: 4px; text-align: right; display: block; }
-        .msg-bubble.me .msg-time { color: rgba(255,255,255,0.6); }
-        #chat-input-area { background: white; padding: 10px; border-top: 1px solid #eee; display: flex; align-items: center; gap: 8px; }
-        #image-upload-label { font-size: 1.2rem; cursor: pointer; color: #888; }
-        input#chat-input-text { flex: 1; border-radius: 20px; border: 1px solid #ddd; padding: 8px 15px; font-size: 14px; outline: none; }
-        button#chat-send-btn { background: none; border: none; color: var(--accent); font-weight: bold; font-size: 0.9rem; cursor: pointer; padding: 0 10px; }
-        button#chat-send-btn:disabled { color: #ccc; }
     </style>
 </head>
 <body>
@@ -75,7 +61,7 @@
 
     <div id="login-screen">
         <h1 style="color: #888; margin-bottom: 20px;">選擇你的身分</h1>
-        <img src="https://img0.baidu.com/it/u=3027201083,1695537574&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500" style="width:120px; height:120px; border-radius:60px; margin-bottom:20px; object-fit: cover; box-shadow: 0 4px 15px rgba(0,0,0,0.1);">
+        <img src="https://img0.baidu.com/it/u=3027201083,1695537574&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500" style="width:120px; border-radius:60px; margin-bottom:20px;">
         <button class="login-btn btn-ysc" onclick="initApp('ysc')">ysc</button>
         <button class="login-btn btn-lcl" onclick="initApp('lcl')">lcl</button>
     </div>
@@ -88,56 +74,44 @@
     </div>
 
     <div id="page-calendar" class="page active">
-        <div id="together-days">寶寶，我們已經在一起 1 天了</div>
+        <div id="together-days">已經在一起 0 天了</div>
 
         <div class="section">
-            <h2 id="morningTitle">早上必讀</h2>
-            <div id="todoList" style="font-size:0.8rem; color:#999; padding-bottom:10px;">(以前的任務，可在通訊中聊天)</div>
-            <div class="input-group" style="display:none;"> <input type="text" id="taskInput">
-                <button class="add-btn" onclick="addTask()">發送</button>
-            </div>
-        </div>
-
-        <div class="section">
-            <h2>🗓️ 滾動日曆 (可拖動願望)</h2>
-            <div id="weekdayHeaders" class="calendar-grid"></div>
+            <h2>🗓️ 滾動日曆 (點 ❤️ 紀錄愛愛)</h2>
+            <div id="weekdayHeaders" class="calendar-grid" style="text-align:center; font-size:0.7rem; color:#ccc; margin-bottom:5px;"></div>
             <div id="rollingCalendar" class="calendar-grid"></div>
         </div>
 
         <div class="section">
-            <h2>🍰 願望清單 (Wish List)</h2>
-            <h3>📍 豬癮犯了 (美食)</h3>
-            <div class="input-group"><input type="text" id="input-food"><button class="add-btn" onclick="addWish('food')">添加</button></div>
-            <div id="list-food"></div>
-            <h3>📍 腳要痛了 (旅遊)</h3>
-            <div class="input-group"><input type="text" id="input-travel"><button class="add-btn" onclick="addWish('travel')">添加</button></div>
-            <div id="list-travel"></div>
-            <h3>📍 總得做點什麼 (活動)</h3>
-            <div class="input-group"><input type="text" id="input-activity"><button class="add-btn" onclick="addWish('activity')">添加</button></div>
+            <h2>🍰 願望清單 (可拖動)</h2>
+            <div class="input-group" style="display:flex; gap:5px; margin-bottom:15px;">
+                <input type="text" id="wishInput" placeholder="想和寶寶做什麼..." style="flex:1; padding:10px; border-radius:10px; border:1px solid #eee;">
+                <button onclick="addWish('activity')" style="padding:10px; border-radius:10px; background:var(--accent); color:white; border:none; font-weight:bold;">添加</button>
+            </div>
             <div id="list-activity"></div>
         </div>
 
-        <div class="section" style="display:none;"> <h2>📜 我們的回回忆</h2>
-            <div id="archiveList" class="archive-list"></div>
-            <button onclick="generateLoveReport()">📊 生成 Gemini 報告</button>
+        <div class="section">
+            <div class="archive-toggle" onclick="toggleArchive()">📜 查看我們的歷史紀錄 (點擊展開)</div>
+            <div id="archiveList"></div>
         </div>
     </div>
 
     <div id="page-chat" class="page">
-        <div id="chat-container">
-            <div id="chat-messages">
+        <div class="section" style="padding:10px;">
+            <div id="chat-container">
+                <div id="chat-messages"></div>
+                <div id="chat-input-area" style="display:flex; padding:10px; background:white; gap:5px;">
+                    <label for="image-input" style="font-size:1.5rem;">📸</label>
+                    <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
+                    <input type="text" id="chat-input-text" placeholder="輸入消息..." style="flex:1; border-radius:20px; border:1px solid #eee; padding:5px 15px;">
+                    <button id="chat-send-btn" onclick="sendChatMessage()" style="background:none; border:none; color:var(--accent); font-weight:bold;">送出</button>
                 </div>
-            <div id="chat-input-area">
-                <label id="image-upload-label" for="image-input">📸</label>
-                <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
-                <input type="text" id="chat-input-text" placeholder="輸入消息..." oninput="toggleSendBtn()" onkeypress="handleChatKey(event)">
-                <button id="chat-send-btn" onclick="sendChatMessage()" disabled>送出</button>
             </div>
         </div>
     </div>
 
     <script>
-        // --- 1. 配置 Firebase (请勿更改) ---
         const firebaseConfig = {
             apiKey: "AIzaSyDvzd2ZhT-HfuJoJ28S14cun-6D_wNILtg",
             authDomain: "ourloveplanner.firebaseapp.com",
@@ -150,218 +124,136 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let currentUser = '';
-        const monthNames = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-        let draggedItem = null;
-        let lastMessageCount = -1; // 用于检测新消息
-        let isChatActive = false; // 通讯页面是否激活
-
-        //在一起时间：2024年9月18日
-        const startDate = new Date('2024-09-18T00:00:00+08:00');
+        let currentUser = '', lastMsgCount = -1, draggedItem = null;
+        const startDate = new Date('2024-09-18');
 
         function initApp(u) {
             currentUser = u;
             document.getElementById('login-screen').style.display = 'none';
             document.documentElement.style.setProperty('--accent', (u === 'ysc' ? '#607d8b' : '#ffafbd'));
             
-            // 计算在一起的天数
-            const today = new Date();
-            const timeDiff = today.getTime() - startDate.getTime();
-            const daysDiff = Math.floor(timeDiff / (1000 * 3600 * 24)) + 1; // 包含当天
-            document.getElementById('together-days').innerText = `寶寶，我們已經在一起 ${daysDiff} 天了`;
+            const diff = Math.floor((new Date() - startDate) / (1000 * 60 * 60 * 24)) + 1;
+            document.getElementById('together-days').innerText = `已經在一起 ${diff} 天了`;
 
-            // 监听数据，包括聊天
             db.ref('data').on('value', s => render(s.val() || {}));
         }
 
-        function switchPage(page) {
-            document.querySelectorAll('.page').forEach(p => p.classList.remove('active'));
-            document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
-            document.getElementById('page-' + page).classList.add('active');
-            isChatActive = (page === 'chat');
-            
-            // 修正：确保点击的按钮是 active 的
-            const currentNavBtn = Array.from(document.querySelectorAll('.nav-btn')).find(b => b.innerText.includes(page==='calendar'?'紀念日曆':'通訊'));
-            if(currentNavBtn) currentNavBtn.classList.add('active');
-
-            if(isChatActive) setTimeout(scrollToBottom, 100);
+        function switchPage(p) {
+            document.querySelectorAll('.page').forEach(pg => pg.classList.remove('active'));
+            document.querySelectorAll('.nav-btn').forEach(bn => bn.classList.remove('active'));
+            document.getElementById('page-' + p).classList.add('active');
+            event.target.classList.add('active');
+            if(p === 'chat') setTimeout(() => { const c = document.getElementById('chat-messages'); c.scrollTop = c.scrollHeight; }, 100);
         }
 
-        function showNotification(type) {
-            const notif = document.getElementById('web-notification');
-            notif.innerText = (type === 'image' ? '📸 收到寶寶的照片' : '💕 收到寶寶的消息');
-            notif.classList.add('show');
-            setTimeout(() => notif.classList.remove('show'), 3000);
+        function toggleArchive() {
+            const list = document.getElementById('archiveList');
+            list.style.display = (list.style.display === 'block' ? 'none' : 'block');
         }
 
-        // --- 拖拽核心逻辑 (不可省略) ---
-        function getToday() { const d = new Date(); d.setHours(0,0,0,0); return d; }
-        function formatDate(d) { return `${d.getFullYear()}-${String(d.getMonth()+1).padStart(2,'0')}-${String(d.getDate()).padStart(2,'0')}`; }
-        
-        function handleDragStart(e, type, data) {
-            draggedItem = { type, ...data };
-            document.getElementById('trash-can').classList.add('visible');
-            e.dataTransfer.setData('text/plain', '');
-        }
-        function handleDragEnd() { document.getElementById('trash-can').classList.remove('visible'); }
-
-        // --- 願望核心逻辑 (不可省略) ---
         function addWish(cat) {
-            const i = document.getElementById('input-' + cat);
+            const i = document.getElementById('wishInput');
             if(!i.value) return;
-            db.ref(`data/wishes/${cat}`).push({ text: i.value, by: currentUser, time: new Date().toLocaleString() });
+            db.ref(`data/wishes/${cat}`).push({ text: i.value, by: currentUser });
             i.value = '';
         }
 
-        // --- 聊天功能核心逻辑 (全新添加) ---
-        function scrollToBottom() {
-            const container = document.getElementById('chat-messages');
-            container.scrollTop = container.scrollHeight;
-        }
-
-        function toggleSendBtn() {
-            document.getElementById('chat-send-btn').disabled = !document.getElementById('chat-input-text').value.trim();
-        }
-
-        function handleChatKey(e) { if(e.key === 'Enter' && !document.getElementById('chat-send-btn').disabled) sendChatMessage(); }
-
         function sendChatMessage() {
-            const input = document.getElementById('chat-input-text');
-            if(!input.value.trim()) return;
-            db.ref('data/chats').push({
-                type: 'text',
-                text: input.value.trim(),
-                by: currentUser,
-                time: new Date().getTime()
-            });
-            input.value = '';
-            toggleSendBtn();
+            const i = document.getElementById('chat-input-text');
+            if(!i.value) return;
+            db.ref('data/chats').push({ type: 'text', text: i.value, by: currentUser, time: Date.now() });
+            i.value = '';
         }
 
-        function handleImageUpload(event) {
-            const file = event.target.files[0];
-            if (!file || !file.type.startsWith('image/')) return;
-            // 提醒上传中
-            alert("正在上傳宝宝的照片，請稍候...");
+        function handleImageUpload(e) {
+            const file = e.target.files[0];
             const reader = new FileReader();
-            reader.onload = function(e) {
-                db.ref('data/chats').push({
-                    type: 'image',
-                    imgBase64: e.target.result, // 存储为Base64字符串
-                    by: currentUser,
-                    time: new Date().getTime()
-                });
-            };
+            reader.onload = (ev) => db.ref('data/chats').push({ type: 'image', imgBase64: ev.target.result, by: currentUser, time: Date.now() });
             reader.readAsDataURL(file);
-            event.target.value = ''; // 重置文件输入
         }
 
-        // --- 核心渲染函数 ---
         function render(data) {
-            // 1. 设置垃圾桶
+            // 1. 垃圾桶與拖拽
             const trash = document.getElementById('trash-can');
             trash.ondragover = (e) => e.preventDefault();
             trash.ondrop = () => {
-                if(confirm(`寶寶，確定要刪除 "${draggedItem.text}" 嗎？`)) {
-                    if(draggedItem.type === 'wish') db.ref(`data/wishes/${draggedItem.cat}/${draggedItem.id}`).remove();
-                    if(draggedItem.type === 'plan') db.ref(`data/plans/${draggedItem.date}/${draggedItem.id}`).remove();
-                }
+                if(draggedItem.type === 'wish') db.ref(`data/wishes/${draggedItem.cat}/${draggedItem.id}`).remove();
+                if(draggedItem.type === 'plan') db.ref(`data/plans/${draggedItem.date}/${draggedItem.id}`).remove();
             };
 
-            // 2. 纪念日历页面渲染 (拖拽、愿望)
-            // Wish List 三个分类
-            ['food', 'travel', 'activity'].forEach(cat => {
-                const listEl = document.getElementById('list-' + cat);
-                listEl.innerHTML = '';
-                if(data.wishes && data.wishes[cat]) {
-                    Object.entries(data.wishes[cat]).forEach(([id, w]) => {
-                        const el = document.createElement('div');
-                        el.className = 'wish-item'; el.draggable = true;
-                        el.innerHTML = `<span>${w.text}</span><small style="color:#eee; font-size:0.6rem;">by ${w.by}</small>`;
-                        el.ondragstart = (e) => handleDragStart(e, 'wish', { id, cat, text: w.text });
-                        el.ondragend = handleDragEnd;
-                        listEl.appendChild(el);
-                    });
+            // 2. 吵架偵測 (24小時無消息)
+            const chats = Object.values(data.chats || {});
+            const lastTime = chats.length ? chats[chats.length-1].time : 0;
+            if(lastTime > 0 && (Date.now() - lastTime > 86400000)) {
+                const today = new Date().toLocaleDateString();
+                if(!data.archives || !Object.values(data.archives).find(a => a.date === today && a.type === 'fight')) {
+                    db.ref('data/archives').push({ type: 'fight', text: '💣 寶寶今天好像吵架了', date: today });
                 }
+            }
+
+            // 3. 渲染聊天
+            const msgBox = document.getElementById('chat-messages');
+            msgBox.innerHTML = '';
+            chats.forEach(m => {
+                const b = document.createElement('div');
+                b.className = `msg-bubble ${m.by === currentUser ? 'me' : 'other'}`;
+                if(m.type === 'text') b.innerText = m.text;
+                else b.innerHTML = `<img src="${m.imgBase64}">`;
+                msgBox.appendChild(b);
             });
 
-            // 滾動日曆渲染
+            // 4. 渲染願望
+            const wishBox = document.getElementById('list-activity');
+            wishBox.innerHTML = '';
+            Object.entries(data.wishes?.activity || {}).forEach(([id, w]) => {
+                const d = document.createElement('div');
+                d.className = 'wish-item'; d.draggable = true;
+                d.style = "display:flex;justify-content:space-between;padding:8px;border:1px solid #f0f0f0;margin-bottom:5px;border-radius:8px;";
+                d.innerHTML = `<span>${w.text}</span>`;
+                d.ondragstart = () => { draggedItem = { type:'wish', cat:'activity', id, text:w.text }; trash.classList.add('visible'); };
+                d.ondragend = () => trash.classList.remove('visible');
+                wishBox.appendChild(d);
+            });
+
+            // 5. 渲染日曆
             const cal = document.getElementById('rollingCalendar');
-            const head = document.getElementById('weekdayHeaders');
-            cal.innerHTML = ''; head.innerHTML = '';
-            ['日','一','二','三','四','五','六'].forEach(n => head.innerHTML += `<div>${n}</div>`);
-            const start = getToday(); start.setDate(start.getDate() - start.getDay());
+            cal.innerHTML = '';
+            const now = new Date(); now.setHours(0,0,0,0);
+            const start = new Date(now); start.setDate(now.getDate() - now.getDay());
 
             for(let i=0; i<35; i++) {
                 const curr = new Date(start); curr.setDate(start.getDate() + i);
-                const dKey = formatDate(curr);
-                const isPast = curr < getToday();
+                const dKey = curr.toLocaleDateString();
                 const card = document.createElement('div');
-                card.className = `day-card ${isPast?'is-past':''} ${dKey===formatDate(getToday())?'is-today':''}`;
+                card.className = `day-card ${dKey === now.toLocaleDateString() ? 'is-today' : ''}`;
+                card.innerHTML = `<span style="font-size:0.6rem;color:#ccc;">${curr.getDate()}</span><div class="heart-quick-btn">❤️</div>`;
                 
-                if(!isPast) {
-                    card.ondragover = (e) => { e.preventDefault(); card.classList.add('drag-over'); };
-                    card.ondragleave = () => card.classList.remove('drag-over');
-                    card.ondrop = () => {
-                        card.classList.remove('drag-over');
-                        if(draggedItem.type === 'wish') {
-                            db.ref(`data/plans/${dKey}`).push(draggedItem.text);
-                            db.ref(`data/wishes/${draggedItem.cat}/${draggedItem.id}`).remove();
-                        } else if(draggedItem.type === 'plan') {
-                            db.ref(`data/plans/${dKey}`).push(draggedItem.text);
-                            db.ref(`data/plans/${draggedItem.date}/${draggedItem.id}`).remove();
-                        }
-                    };
-                    card.onclick = () => { const v = prompt(`寶寶，在 ${dKey} 有什麼計畫:`); if(v) db.ref(`data/plans/${dKey}`).push(v); };
-                }
+                // 愛心快捷鍵
+                card.querySelector('.heart-quick-btn').onclick = (e) => { e.stopPropagation(); db.ref(`data/plans/${dKey}`).push('❤️'); };
+                
+                card.ondragover = (e) => e.preventDefault();
+                card.ondrop = () => {
+                    if(draggedItem.type === 'wish') { db.ref(`data/plans/${dKey}`).push(draggedItem.text); db.ref(`data/wishes/${draggedItem.cat}/${draggedItem.id}`).remove(); }
+                    else { db.ref(`data/plans/${dKey}`).push(draggedItem.text); db.ref(`data/plans/${draggedItem.date}/${draggedItem.id}`).remove(); }
+                };
 
-                const dateDisplay = `${curr.getDate()}/${monthNames[curr.getMonth()]}`;
-                card.innerHTML = `<span class="date-label">${dateDisplay}</span>`;
-                if(data.plans && data.plans[dKey]) {
-                    Object.entries(data.plans[dKey]).forEach(([id, p]) => {
-                        const pTag = document.createElement('div');
-                        pTag.className = 'plan-tag'; pTag.draggable = true; pTag.innerText = p;
-                        pTag.onclick = (e) => { e.stopPropagation(); alert(`這是寶寶在 ${dKey} 的計畫：${p}`); };
-                        pTag.ondragstart = (e) => { e.stopPropagation(); handleDragStart(e, 'plan', { id, date: dKey, text: p }); };
-                        pTag.ondragend = handleDragEnd;
-                        card.appendChild(pTag);
+                if(data.plans?.[dKey]) {
+                    Object.entries(data.plans[dKey]).forEach(([pid, p]) => {
+                        const t = document.createElement('div');
+                        t.className = 'plan-tag'; t.draggable = true; t.innerText = p;
+                        t.ondragstart = (e) => { e.stopPropagation(); draggedItem = { type:'plan', date:dKey, id:pid, text:p }; trash.classList.add('visible'); };
+                        card.appendChild(t);
                     });
                 }
                 cal.appendChild(card);
             }
 
-            // 3. 通訊聊天页面渲染 (Instagram 风)
-            const chatCont = document.getElementById('chat-messages');
-            chatCont.innerHTML = '';
-            const chatEntries = Object.values(data.chats || {});
-            
-            // 检测新消息进行通知
-            if(lastMessageCount !== -1 && chatEntries.length > lastMessageCount) {
-                const latestMsg = chatEntries[chatEntries.length - 1];
-                if(latestMsg.by !== currentUser && !isChatActive) {
-                    showNotification(latestMsg.type);
-                }
-            }
-            lastMessageCount = chatEntries.length;
-
-            // 历史消息（从旧到新渲染，但显示最底部）
-            chatEntries.forEach(m => {
-                const bubble = document.createElement('div');
-                bubble.className = `msg-bubble ${m.by === currentUser ? 'me' : 'other'}`;
-                
-                const d = new Date(m.time);
-                const timeStr = `${d.getHours()}:${String(d.getMinutes()).padStart(2,'0')}`;
-
-                if(m.type === 'text') {
-                    bubble.innerText = m.text;
-                } else if(m.type === 'image') {
-                    bubble.innerHTML = `<img src="${m.imgBase64}" onerror="this.src='broken.png'">`;
-                }
-                bubble.innerHTML += `<span class="msg-time">${timeStr}</span>`;
-                chatCont.appendChild(bubble);
+            // 6. 渲染歷史紀錄
+            const archBox = document.getElementById('archiveList');
+            archBox.innerHTML = '';
+            Object.values(data.archives || {}).reverse().forEach(a => {
+                archBox.innerHTML += `<div style="padding:5px 0; border-bottom:1px solid #f9f9f9;">${a.date}: ${a.text}</div>`;
             });
-            // 首次渲染后或收到消息时自动滚动到底部
-            if(isChatActive) setTimeout(scrollToBottom, 50);
         }
     </script>
 </body>
