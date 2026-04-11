@@ -34,7 +34,8 @@
         h2 { font-size: 0.95rem; color: var(--accent); margin: 0; }
         h3 { font-size: 0.8rem; color: #aaa; margin: 15px 0 5px 0; }
         
-        .heart-add-btn { background: var(--bg); color: var(--accent); border: 1.5px solid var(--accent); padding: 4px 10px; border-radius: 15px; font-size: 0.75rem; font-weight: bold; cursor: pointer; }
+        .heart-add-btn { background: var(--bg); color: var(--accent); border: 1.5px solid var(--accent); padding: 4px 12px; border-radius: 15px; font-size: 0.75rem; font-weight: bold; cursor: pointer; transition: 0.2s; }
+        .heart-add-btn:active { transform: scale(0.9); background: var(--accent); color: white; }
 
         .input-group { display: flex; gap: 8px; margin-bottom: 15px; }
         input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #eee; outline: none; font-size: 14px; }
@@ -97,7 +98,7 @@
         <div class="section">
             <div class="section-header">
                 <h2>🗓️ 滾動日曆（可拖動願望）</h2>
-                <button class="heart-add-btn" onclick="addHeartToToday()">➕ ❤️ 紀錄親密</button>
+                <button class="heart-add-btn" onclick="addHeartToToday()" ❤️ </button>
             </div>
             <div id="weekdayHeaders" class="calendar-grid" style="text-align:center; font-size:0.7rem; color:#ccc; margin-bottom:8px;"></div>
             <div id="rollingCalendar" class="calendar-grid"></div>
@@ -152,6 +153,12 @@
         let currentUser = '', draggedItem = null, allData = {};
         const startDate = new Date('2024-09-18');
         const monthShort = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
+
+        // 標準化日期格式函數：確保 YYYY-MM-DD
+        const formatDateKey = (date) => {
+            const d = new Date(date);
+            return `${d.getFullYear()}-${String(d.getMonth() + 1).padStart(2, '0')}-${String(d.getDate()).padStart(2, '0')}`;
+        };
 
         function initApp(u) {
             currentUser = u;
@@ -210,12 +217,13 @@
             reader.readAsDataURL(file);
         }
 
-        // --- 修正後的紅心邏輯：僅添加至當天 ---
+        // --- 修復後的紅心添加邏輯 ---
         function addHeartToToday() {
-            const todayStr = new Date().toLocaleDateString();
-            const currentPlans = allData.plans?.[todayStr] || {};
+            const todayKey = formatDateKey(new Date()); // 強制使用標準化日期鍵
+            const currentPlans = allData.plans?.[todayKey] || {};
             let heartCount = 0, heartId = null;
 
+            // 遍歷當天所有計畫，尋找是否已有紅心
             Object.entries(currentPlans).forEach(([id, text]) => {
                 if(typeof text === 'string' && text.includes('❤️')) {
                     heartCount = (text.match(/❤️/g) || []).length;
@@ -225,9 +233,15 @@
 
             heartCount++;
             const newStr = '❤️'.repeat(heartCount);
-            if(heartId) db.ref(`data/plans/${todayStr}/${heartId}`).set(newStr);
-            else db.ref(`data/plans/${todayStr}`).push(newStr);
             
+            // 如果已有紅心則更新，否則新建
+            if(heartId) {
+                db.ref(`data/plans/${todayKey}/${heartId}`).set(newStr);
+            } else {
+                db.ref(`data/plans/${todayKey}`).push(newStr);
+            }
+            
+            // 同時更新最後活躍時間
             updateActivity();
         }
 
@@ -242,10 +256,10 @@
             };
 
             const lastActive = data.lastActivityTime || 0;
-            const todayStr = new Date().toLocaleDateString();
+            const todayKey = formatDateKey(new Date());
             if(lastActive > 0 && (Date.now() - lastActive > 86400000)) {
-                if(!data.archives || !Object.values(data.archives).find(a => a.date === todayStr && a.type === 'fight')) {
-                    db.ref('data/archives').push({ type: 'fight', text: '💣 寶寶今天好像吵架了 (整天無人使用App)', date: todayStr, timestamp: Date.now() });
+                if(!data.archives || !Object.values(data.archives).find(a => a.date === todayKey && a.type === 'fight')) {
+                    db.ref('data/archives').push({ type: 'fight', text: '💣 寶寶今天好像吵架了 (整天無人使用App)', date: todayKey, timestamp: Date.now() });
                 }
             }
 
@@ -300,9 +314,9 @@
 
             for(let i=0; i<35; i++) {
                 const curr = new Date(start); curr.setDate(start.getDate() + i);
-                const dKey = curr.toLocaleDateString();
+                const dKey = formatDateKey(curr);
                 const card = document.createElement('div');
-                card.className = `day-card ${dKey === now.toLocaleDateString() ? 'is-today' : ''}`;
+                card.className = `day-card ${dKey === todayKey ? 'is-today' : ''}`;
                 card.innerHTML = `<span class="date-label">${curr.getDate()}/${monthShort[curr.getMonth()]}</span>`;
                 
                 card.onclick = () => { const v = prompt(`在 ${dKey} 的新計畫:`); if(v) { db.ref(`data/plans/${dKey}`).push(v); updateActivity(); } };
@@ -316,7 +330,7 @@
                 if(data.plans?.[dKey]) {
                     Object.entries(data.plans[dKey]).forEach(([pid, p]) => {
                         const t = document.createElement('div'); t.className = 'plan-tag'; t.draggable = true; t.innerText = p;
-                        if(p.includes('❤️')) t.style.background = "#ff4d4d";
+                        if(typeof p === 'string' && p.includes('❤️')) t.style.background = "#ff4d4d";
                         t.ondragstart = (e) => { e.stopPropagation(); draggedItem = { type:'plan', date:dKey, id:pid, text:p }; trash.classList.add('visible'); };
                         card.appendChild(t);
                     });
