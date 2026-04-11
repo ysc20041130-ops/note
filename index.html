@@ -20,9 +20,6 @@
         .nav-btn { background: none; border: none; font-size: 1rem; font-weight: bold; color: #999; cursor: pointer; padding: 5px 10px; border-radius: 20px; }
         .nav-btn.active { color: var(--accent); background: rgba(255, 175, 189, 0.1); }
 
-        #web-notification { position: fixed; top: -100px; left: 50%; transform: translateX(-50%); width: 90%; max-width: 400px; background: white; padding: 15px; border-radius: 25px; box-shadow: 0 10px 30px rgba(0,0,0,0.1); z-index: 10000; text-align: center; font-weight: bold; transition: 0.5s ease; border: 2px solid var(--accent); }
-        #web-notification.show { top: 20px; }
-
         #login-screen { position: fixed; top: 0; left: 0; width: 100%; height: 100%; background: #fdf2f4; z-index: 9999; display: flex; flex-direction: column; align-items: center; justify-content: center; }
         .login-btn { width: 200px; padding: 20px; margin: 10px; border-radius: 50px; border: none; font-size: 1.2rem; font-weight: bold; color: white; cursor: pointer; }
         .btn-ysc { background: var(--ysc-blue); } .btn-lcl { background: var(--lcl-pink); }
@@ -31,37 +28,43 @@
         .page { display: none; padding: 15px; } .page.active { display: block; }
         .section { background: white; border-radius: 20px; padding: 20px; margin-bottom: 20px; box-shadow: 0 4px 15px rgba(0,0,0,0.05); }
         h2 { font-size: 1rem; color: var(--accent); margin-bottom: 15px; border-bottom: 1px solid #eee; padding-bottom: 8px; }
+        h3 { font-size: 0.8rem; color: #888; margin: 15px 0 5px 0; }
         
-        /* 日曆格子的愛心按鈕 */
+        /* 願望清單與輸入 */
+        .input-group { display: flex; gap: 8px; margin-bottom: 15px; }
+        input { flex: 1; padding: 12px; border-radius: 12px; border: 1px solid #eee; outline: none; }
+        button.add-btn { background: var(--accent); color: white; border: none; padding: 0 15px; border-radius: 12px; font-weight: bold; }
+        .wish-item { display: flex; justify-content: space-between; padding: 10px; background: #fff; border: 1px solid #f0f0f0; border-radius: 10px; margin-bottom: 5px; cursor: grab; font-size: 0.9rem; }
+
+        /* 日曆 */
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
         .day-card { background: #fff; border: 1px solid #feefee; border-radius: 10px; min-height: 75px; padding: 5px; position: relative; }
+        .day-card.is-today { border: 2px solid var(--accent); }
         .heart-quick-btn { position: absolute; bottom: 2px; right: 2px; font-size: 0.8rem; cursor: pointer; opacity: 0.3; transition: 0.3s; }
         .heart-quick-btn:hover { opacity: 1; transform: scale(1.2); }
-        .day-card.is-today { border: 2px solid var(--accent); }
-        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 5px; }
-        .plan-tag { background: var(--accent); color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.65rem; margin-top: 2px; cursor: grab; }
+        .plan-tag { background: var(--accent); color: white; padding: 2px 4px; border-radius: 4px; font-size: 0.65rem; margin-top: 2px; cursor: grab; display: block; word-break: break-all; }
 
         /* 通訊界面 */
-        #chat-container { display: flex; flex-direction: column; height: 60vh; background: #fafafa; border-radius: 20px; overflow: hidden; }
+        #chat-container { display: flex; flex-direction: column; height: 65vh; background: #fafafa; border-radius: 20px; overflow: hidden; }
         #chat-messages { flex: 1; padding: 15px; overflow-y: auto; display: flex; flex-direction: column; gap: 8px; }
-        .msg-bubble { max-width: 75%; padding: 8px 12px; border-radius: 15px; font-size: 0.9rem; position: relative; }
+        .msg-bubble { max-width: 75%; padding: 8px 12px; border-radius: 15px; font-size: 0.9rem; }
         .msg-bubble.me { align-self: flex-end; background: var(--accent); color: white; }
         .msg-bubble.other { align-self: flex-start; background: #eee; color: #333; }
         .msg-bubble img { max-width: 100%; border-radius: 10px; margin-top: 5px; }
 
-        /* 可折疊歷史紀錄 */
+        /* 歷史紀錄 */
         .archive-toggle { cursor: pointer; color: #999; font-size: 0.85rem; padding: 10px; border-radius: 10px; background: #f9f9f9; text-align: center; margin-top: 10px; }
-        #archiveList { display: none; margin-top: 10px; font-size: 0.8rem; color: #888; border-top: 1px dashed #eee; padding-top: 10px; }
+        #archiveList { display: none; margin-top: 10px; font-size: 0.8rem; color: #888; padding-top: 10px; }
+        
         #trash-can { position: fixed; top: 0; right: -80px; width: 80px; height: 100%; background: #ff4d4d; color: white; display: flex; align-items: center; justify-content: center; writing-mode: vertical-rl; transition: 0.3s; z-index: 1000; }
         #trash-can.visible { right: 0; }
     </style>
 </head>
 <body>
 
-    <div id="web-notification">💕 收到寶寶的消息</div>
-
     <div id="login-screen">
         <h1 style="color: #888; margin-bottom: 20px;">選擇你的身分</h1>
-        <img src="https://img0.baidu.com/it/u=3027201083,1695537574&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500" style="width:120px; border-radius:60px; margin-bottom:20px;">
+        <img src="https://img0.baidu.com/it/u=3027201083,1695537574&fm=253&fmt=auto&app=138&f=JPEG?w=500&h=500" style="width:120px; height:120px; border-radius:60px; margin-bottom:20px; object-fit: cover;">
         <button class="login-btn btn-ysc" onclick="initApp('ysc')">ysc</button>
         <button class="login-btn btn-lcl" onclick="initApp('lcl')">lcl</button>
     </div>
@@ -77,16 +80,32 @@
         <div id="together-days">已經在一起 0 天了</div>
 
         <div class="section">
-            <h2>🗓️ 滾動日曆 (點 ❤️ 紀錄愛愛)</h2>
+            <h2>🗓️ 滾動日曆 (拖動加入日曆)</h2>
             <div id="weekdayHeaders" class="calendar-grid" style="text-align:center; font-size:0.7rem; color:#ccc; margin-bottom:5px;"></div>
             <div id="rollingCalendar" class="calendar-grid"></div>
         </div>
 
         <div class="section">
-            <h2>🍰 願望清單 (可拖動)</h2>
-            <div class="input-group" style="display:flex; gap:5px; margin-bottom:15px;">
-                <input type="text" id="wishInput" placeholder="想和寶寶做什麼..." style="flex:1; padding:10px; border-radius:10px; border:1px solid #eee;">
-                <button onclick="addWish('activity')" style="padding:10px; border-radius:10px; background:var(--accent); color:white; border:none; font-weight:bold;">添加</button>
+            <h2>🍰 願望清單 (Wish List)</h2>
+            
+            <h3>📍 豬癮犯了 (美食)</h3>
+            <div class="input-group">
+                <input type="text" id="input-food" placeholder="想吃什麼...">
+                <button class="add-btn" onclick="addWish('food')">添加</button>
+            </div>
+            <div id="list-food"></div>
+
+            <h3>📍 腳要痛了 (旅遊)</h3>
+            <div class="input-group">
+                <input type="text" id="input-travel" placeholder="想去哪裡...">
+                <button class="add-btn" onclick="addWish('travel')">添加</button>
+            </div>
+            <div id="list-travel"></div>
+
+            <h3>📍 總得做點什麼 (活動)</h3>
+            <div class="input-group">
+                <input type="text" id="input-activity" placeholder="想做什麼...">
+                <button class="add-btn" onclick="addWish('activity')">添加</button>
             </div>
             <div id="list-activity"></div>
         </div>
@@ -101,8 +120,8 @@
         <div class="section" style="padding:10px;">
             <div id="chat-container">
                 <div id="chat-messages"></div>
-                <div id="chat-input-area" style="display:flex; padding:10px; background:white; gap:5px;">
-                    <label for="image-input" style="font-size:1.5rem;">📸</label>
+                <div id="chat-input-area" style="display:flex; padding:10px; background:white; gap:5px; border-top:1px solid #eee;">
+                    <label for="image-input" style="font-size:1.5rem; cursor:pointer;">📸</label>
                     <input type="file" id="image-input" accept="image/*" style="display:none;" onchange="handleImageUpload(event)">
                     <input type="text" id="chat-input-text" placeholder="輸入消息..." style="flex:1; border-radius:20px; border:1px solid #eee; padding:5px 15px;">
                     <button id="chat-send-btn" onclick="sendChatMessage()" style="background:none; border:none; color:var(--accent); font-weight:bold;">送出</button>
@@ -124,7 +143,7 @@
         firebase.initializeApp(firebaseConfig);
         const db = firebase.database();
 
-        let currentUser = '', lastMsgCount = -1, draggedItem = null;
+        let currentUser = '', draggedItem = null;
         const startDate = new Date('2024-09-18');
 
         function initApp(u) {
@@ -152,7 +171,7 @@
         }
 
         function addWish(cat) {
-            const i = document.getElementById('wishInput');
+            const i = document.getElementById('input-' + cat);
             if(!i.value) return;
             db.ref(`data/wishes/${cat}`).push({ text: i.value, by: currentUser });
             i.value = '';
@@ -173,7 +192,6 @@
         }
 
         function render(data) {
-            // 1. 垃圾桶與拖拽
             const trash = document.getElementById('trash-can');
             trash.ondragover = (e) => e.preventDefault();
             trash.ondrop = () => {
@@ -181,17 +199,17 @@
                 if(draggedItem.type === 'plan') db.ref(`data/plans/${draggedItem.date}/${draggedItem.id}`).remove();
             };
 
-            // 2. 吵架偵測 (24小時無消息)
+            // 吵架偵測
             const chats = Object.values(data.chats || {});
             const lastTime = chats.length ? chats[chats.length-1].time : 0;
+            const todayStr = new Date().toLocaleDateString();
             if(lastTime > 0 && (Date.now() - lastTime > 86400000)) {
-                const today = new Date().toLocaleDateString();
-                if(!data.archives || !Object.values(data.archives).find(a => a.date === today && a.type === 'fight')) {
-                    db.ref('data/archives').push({ type: 'fight', text: '💣 寶寶今天好像吵架了', date: today });
+                if(!data.archives || !Object.values(data.archives).find(a => a.date === todayStr && a.type === 'fight')) {
+                    db.ref('data/archives').push({ type: 'fight', text: '💣 寶寶今天好像吵架了', date: todayStr });
                 }
             }
 
-            // 3. 渲染聊天
+            // 渲染聊天
             const msgBox = document.getElementById('chat-messages');
             msgBox.innerHTML = '';
             chats.forEach(m => {
@@ -202,24 +220,26 @@
                 msgBox.appendChild(b);
             });
 
-            // 4. 渲染願望
-            const wishBox = document.getElementById('list-activity');
-            wishBox.innerHTML = '';
-            Object.entries(data.wishes?.activity || {}).forEach(([id, w]) => {
-                const d = document.createElement('div');
-                d.className = 'wish-item'; d.draggable = true;
-                d.style = "display:flex;justify-content:space-between;padding:8px;border:1px solid #f0f0f0;margin-bottom:5px;border-radius:8px;";
-                d.innerHTML = `<span>${w.text}</span>`;
-                d.ondragstart = () => { draggedItem = { type:'wish', cat:'activity', id, text:w.text }; trash.classList.add('visible'); };
-                d.ondragend = () => trash.classList.remove('visible');
-                wishBox.appendChild(d);
+            // 渲染三大分類願望
+            ['food', 'travel', 'activity'].forEach(cat => {
+                const box = document.getElementById('list-' + cat);
+                box.innerHTML = '';
+                Object.entries(data.wishes?.[cat] || {}).forEach(([id, w]) => {
+                    const d = document.createElement('div');
+                    d.className = 'wish-item'; d.draggable = true;
+                    d.innerHTML = `<span>${w.text}</span><small style="color:#eee;font-size:0.6rem;">by ${w.by}</small>`;
+                    d.ondragstart = () => { draggedItem = { type:'wish', cat, id, text:w.text }; trash.classList.add('visible'); };
+                    d.ondragend = () => trash.classList.remove('visible');
+                    box.appendChild(d);
+                });
             });
 
-            // 5. 渲染日曆
+            // 渲染日曆
             const cal = document.getElementById('rollingCalendar');
             cal.innerHTML = '';
             const now = new Date(); now.setHours(0,0,0,0);
             const start = new Date(now); start.setDate(now.getDate() - now.getDay());
+            ['日','一','二','三','四','五','六'].forEach(n => document.getElementById('weekdayHeaders').innerHTML += `<div>${n}</div>`);
 
             for(let i=0; i<35; i++) {
                 const curr = new Date(start); curr.setDate(start.getDate() + i);
@@ -228,8 +248,11 @@
                 card.className = `day-card ${dKey === now.toLocaleDateString() ? 'is-today' : ''}`;
                 card.innerHTML = `<span style="font-size:0.6rem;color:#ccc;">${curr.getDate()}</span><div class="heart-quick-btn">❤️</div>`;
                 
-                // 愛心快捷鍵
-                card.querySelector('.heart-quick-btn').onclick = (e) => { e.stopPropagation(); db.ref(`data/plans/${dKey}`).push('❤️'); };
+                card.querySelector('.heart-quick-btn').onclick = (e) => { 
+                    e.stopPropagation(); 
+                    db.ref(`data/plans/${dKey}`).push('❤️');
+                    db.ref('data/archives').push({ text: `❤️ 在 ${dKey} 紀錄了一次親密時光`, date: new Date().toLocaleString() });
+                };
                 
                 card.ondragover = (e) => e.preventDefault();
                 card.ondrop = () => {
@@ -248,11 +271,11 @@
                 cal.appendChild(card);
             }
 
-            // 6. 渲染歷史紀錄
+            // 渲染歷史紀錄
             const archBox = document.getElementById('archiveList');
             archBox.innerHTML = '';
             Object.values(data.archives || {}).reverse().forEach(a => {
-                archBox.innerHTML += `<div style="padding:5px 0; border-bottom:1px solid #f9f9f9;">${a.date}: ${a.text}</div>`;
+                archBox.innerHTML += `<div style="padding:5px 0; border-bottom:1px solid #f9f9f9;">${a.text}</div>`;
             });
         }
     </script>
