@@ -2,754 +2,748 @@
 <html lang="zh-HK">
 <head>
     <meta charset="UTF-8">
-    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no, viewport-fit=cover">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
     <title>Our Love Story</title>
-
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
-    <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-storage-compat.js"></script>
-
+    
     <style>
-        /* * ============================================================
-         * 1. 視覺變量系統 (Design System)
-         * ============================================================
-         */
+        /* --- 全局設計規範 --- */
         :root {
-            --ysc-blue-gray: #607d8b;
-            --lcl-pink: #ffafbd;
-            --bg-portal: #fff0f3;
-            --bg-main: #fdfdfd;
+            --ysc-color: #607d8b;
+            --lcl-color: #ffafbd;
+            --bg-pink: #fdf2f4;
             --white: #ffffff;
-            --text-dark: #2c3e50;
-            --text-gray: #888888;
-            --danger-red: #ff5252;
-            --success-green: #4caf50;
-            --shadow-soft: 0 10px 30px rgba(0,0,0,0.05);
-            --shadow-hard: 0 15px 45px rgba(0,0,0,0.12);
-            --radius-xl: 40px;
-            --radius-lg: 25px;
-            --transition: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
+            --gray-deep: #1a1a1a;  /* 日曆字體變黑 */
+            --gray-sub: #777777;
+            --shadow-soft: 0 10px 40px rgba(0,0,0,0.06);
+            --shadow-hard: 0 20px 50px rgba(0,0,0,0.12);
+            --transition-smooth: all 0.4s cubic-bezier(0.165, 0.84, 0.44, 1);
         }
 
-        /* 全域重置與基礎樣式 */
-        * {
-            margin: 0; padding: 0; box-sizing: border-box;
-            font-family: "PingFang HK", "Heiti TC", "Microsoft JhengHei", sans-serif;
-            -webkit-font-smoothing: antialiased;
+        * { 
+            box-sizing: border-box; 
+            font-family: -apple-system, "PingFang HK", "Helvetica Neue", sans-serif; 
+            -webkit-tap-highlight-color: transparent; 
         }
 
-        body {
-            background: var(--bg-main);
-            color: var(--text-dark);
-            width: 100vw; height: 100vh;
-            overflow: hidden; /* 防止全域滾動，由局部 Scroller 處理 */
+        body { 
+            background: var(--bg-pink); 
+            margin: 0; 
+            padding: 0;
+            overflow-x: hidden; 
+            touch-action: pan-y; 
+            min-height: 100vh;
         }
 
-        /* * ============================================================
-         * 2. 身分選擇頁面 (Portal View - 專屬淡粉色背景)
-         * ============================================================
-         */
-        #portal-screen {
-            position: fixed; top: 0; left: 0; width: 100%; height: 100%;
-            background: var(--bg-portal); z-index: 10000;
+        /* --- 1. 身份選擇頁面 (精美大氣版) --- */
+        #identity-screen {
+            position: fixed; top: 0; left: 0; right: 0; bottom: 0;
+            background: var(--bg-pink); z-index: 10000;
             display: flex; flex-direction: column; align-items: center; justify-content: center;
         }
-
-        .portal-hint {
-            font-size: 2rem; font-weight: 300; letter-spacing: 15px;
-            color: #999; margin-bottom: 60px; text-align: center;
+        .welcome-prompt { 
+            font-size: 2.8rem; 
+            color: #888; 
+            margin-bottom: 80px; 
+            font-weight: 200; 
+            letter-spacing: 5px;
+            text-align: center;
         }
-
-        .portal-btn-group {
-            display: flex; flex-direction: column; gap: 25px;
-        }
-
         .btn-identity {
-            width: 320px; padding: 35px; border: none; border-radius: 60px;
-            font-size: 1.8rem; font-weight: 900; cursor: pointer;
-            box-shadow: var(--shadow-hard); transition: var(--transition);
-            color: white;
+            width: 340px; 
+            padding: 30px; 
+            margin: 20px; 
+            border: none; 
+            border-radius: 90px;
+            font-size: 1.8rem; 
+            font-weight: 900; 
+            color: white; 
+            cursor: pointer; 
+            transition: var(--transition-smooth);
+            box-shadow: 0 15px 35px rgba(0,0,0,0.1);
         }
         .btn-identity:active { transform: scale(0.92); }
-        .btn-identity.ysc { background-color: var(--ysc-blue-gray); }
-        .btn-identity.lcl { background-color: var(--lcl-pink); }
+        .btn-ysc-main { background: var(--ysc-color); }
+        .btn-lcl-main { background: var(--lcl-color); }
 
-        /* * ============================================================
-         * 3. 主應用結構 (Shell & Header)
-         * ============================================================
-         */
-        #app-shell { display: none; flex-direction: column; height: 100vh; }
+        /* --- 2. 全局交互組件 --- */
+        #undo-master-btn {
+            position: fixed; top: 25px; right: 30px; z-index: 9500;
+            background: white; border: none; border-radius: 50%; width: 70px; height: 70px;
+            box-shadow: var(--shadow-hard); cursor: pointer; font-size: 2rem;
+            display: flex; align-items: center; justify-content: center;
+            transition: var(--transition-smooth);
+        }
+        #undo-master-btn:active { transform: rotate(-30deg) scale(0.9); }
 
+        #dynamic-trash {
+            position: fixed; top: 0; right: -130px; width: 110px; height: 100vh;
+            background: #ff3b30; color: white; display: flex; align-items: center; 
+            justify-content: center; writing-mode: vertical-rl; z-index: 9000;
+            transition: 0.5s cubic-bezier(0.19, 1, 0.22, 1); 
+            font-weight: 900; font-size: 1.8rem; letter-spacing: 12px;
+            box-shadow: -10px 0 30px rgba(0,0,0,0.1);
+        }
+        #dynamic-trash.active { right: 0; }
+
+        /* --- 3. 導航欄 --- */
         header {
-            background: rgba(255,255,255,0.95); backdrop-filter: blur(20px);
-            padding: 25px 0; border-bottom: 1px solid rgba(0,0,0,0.03);
-            position: relative; z-index: 5000;
+            position: sticky; top: 0; z-index: 8000; 
+            background: rgba(255,255,255,0.92);
+            backdrop-filter: blur(25px); 
+            border-bottom: 1px solid rgba(0,0,0,0.05);
         }
-
-        .navigation { display: flex; justify-content: center; gap: 50px; }
-        .nav-link {
-            font-size: 1.5rem; font-weight: 900; color: #ddd;
-            cursor: pointer; border: none; background: none; transition: 0.3s;
+        nav { 
+            display: flex; justify-content: space-around; 
+            padding: 28px 10px; max-width: 1400px; margin: 0 auto; 
         }
-        .nav-link.active { color: var(--theme-color); transform: translateY(-3px); }
-
-        /* ↩️ 撤回按鈕 - 右上懸浮 */
-        .btn-undo-action {
-            position: absolute; right: 30px; top: 20px;
-            width: 65px; height: 65px; background: white;
-            border: 2px solid #eee; border-radius: 50%;
-            font-size: 2rem; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; box-shadow: var(--shadow-soft); z-index: 6000;
-            transition: var(--transition);
+        .nav-link { 
+            background: none; border: none; font-size: 1.4rem; 
+            font-weight: 900; color: #ddd; cursor: pointer; 
+            transition: var(--transition-smooth);
         }
-        .btn-undo-action:hover { border-color: var(--theme-color); transform: rotate(-30deg); }
+        .nav-link.active { color: var(--accent); transform: scale(1.15); }
 
-        /* * ============================================================
-         * 4. 核心頁面佈局與適配 (Responsive Grid)
-         * ============================================================
-         */
-        .viewport { flex: 1; overflow-y: auto; padding: 30px; -webkit-overflow-scrolling: touch; }
-        .page { display: none; max-width: 1440px; margin: 0 auto; padding-bottom: 100px; }
-        .page.active { display: block; animation: fadeIn 0.6s ease; }
-        @keyframes fadeIn { from { opacity: 0; } to { opacity: 1; } }
+        /* --- 4. 主視圖容器 --- */
+        .main-scroller { max-width: 1400px; margin: 0 auto; padding: 25px; padding-bottom: 120px; }
+        .app-view { display: none; }
+        .app-view.active { display: block; animation: fadeInUp 0.6s ease; }
+        @keyframes fadeInUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
-        .card {
-            background: var(--white); border-radius: var(--radius-xl);
-            padding: 45px; margin-bottom: 40px; box-shadow: var(--shadow-soft);
+        .glass-card { 
+            background: white; border-radius: 40px; padding: 35px; 
+            margin-bottom: 35px; box-shadow: var(--shadow-soft); 
             position: relative;
         }
 
-        /* 手機與電腦的適配分歧 */
-        @media screen and (max-width: 768px) {
-            .card { padding: 25px; border-radius: var(--radius-lg); }
-            .planner-stack { flex-direction: column; }
-            .cal-cell { min-height: 160px !important; } /* 手機日曆加大 */
-            .navigation { gap: 20px; }
-            .nav-link { font-size: 1.2rem; }
+        /* --- 紀念日曆 UI --- */
+        .hero-stats { text-align: center; }
+        .text-together-days { font-size: 2.2rem; font-weight: 900; color: var(--accent); margin-bottom: 15px; }
+        .text-happy-index { font-size: 1.3rem; color: #999; margin-bottom: 35px; font-weight: 500; }
+        .btn-sign { 
+            padding: 22px 75px; border-radius: 60px; border: none; 
+            background: var(--accent); color: white; font-weight: 900; 
+            font-size: 1.5rem; cursor: pointer; box-shadow: 0 10px 25px rgba(0,0,0,0.1);
         }
 
-        @media screen and (min-width: 769px) {
-            .planner-stack { display: grid; grid-template-columns: repeat(3, 1fr); gap: 30px; }
-            .cal-container { display: flex; gap: 30px; }
-            .cal-main-area { flex: 1; }
+        .module-title { 
+            font-size: 1.35rem; font-weight: 900; margin-bottom: 25px; 
+            display: flex; align-items: center; color: #333; 
         }
 
-        /* * ============================================================
-         * 5. 紀念日曆與原子拖拽 (Calendar Module)
-         * ============================================================
-         */
-        .banner { text-align: center; margin-bottom: 30px; }
-        .counter-days { font-size: 5rem; font-weight: 900; color: var(--theme-color); }
-        .happiness-index { font-size: 1.6rem; color: var(--text-gray); margin: 15px 0; letter-spacing: 3px; }
+        /* 日曆手機大屏適配 */
+        .calendar-section { 
+            margin: 0 -15px; background: white; border-radius: 35px; 
+            padding: 20px 10px; position: relative; 
+        }
+        .calendar-week-labels { 
+            display: grid; grid-template-columns: repeat(7, 1fr); 
+            text-align: center; padding: 20px 0; color: #aaa; 
+            font-weight: 900; font-size: 0.9rem;
+        }
+        .calendar-grid { display: grid; grid-template-columns: repeat(7, 1fr); gap: 6px; }
+        .calendar-day-box {
+            background: #fff; border: 1.5px solid #f8f8f8; border-radius: 18px; 
+            min-height: 120px; padding: 10px; display: flex; flex-direction: column; 
+            position: relative; transition: 0.2s;
+        }
+        .calendar-day-box.is-locked { background: #fcfcfc; }
+        .calendar-day-box.is-locked .calendar-day-label { color: #eee !important; }
+        .calendar-day-label { 
+            font-size: 0.95rem; font-weight: 900; 
+            color: var(--gray-deep); /* 字體變黑 */
+            margin-bottom: 8px; 
+        }
         
-        .btn-check-in {
-            background: var(--theme-color); color: white; border: none;
-            padding: 25px 100px; border-radius: 100px; font-size: 1.8rem;
-            font-weight: 900; cursor: pointer; transition: 0.3s;
+        /* 事件標籤拖拽效果 */
+        .tag-event {
+            background: var(--accent); color: white; font-size: 0.85rem; 
+            padding: 8px 12px; border-radius: 12px; margin-top: 6px; 
+            cursor: grab; white-space: nowrap; overflow: hidden; 
+            text-overflow: ellipsis; box-shadow: 0 4px 10px rgba(0,0,0,0.05);
+        }
+        .tag-event:active { cursor: grabbing; opacity: 0.8; transform: scale(1.05); }
+
+        .btn-quick-heart {
+            position: absolute; right: 20px; top: -70px; width: 65px; height: 65px; 
+            border-radius: 50%; border: 4px solid var(--accent); background: white; 
+            color: var(--accent); font-size: 1.8rem; display: flex; 
+            align-items: center; justify-content: center; box-shadow: var(--shadow-soft);
         }
 
-        /* 日曆格線 */
-        .cal-wrapper { display: grid; grid-template-columns: repeat(7, 1fr); gap: 10px; }
-        .weekday-label { text-align: center; color: #ccc; font-weight: 900; padding: 10px; text-transform: uppercase; }
-        .cal-cell {
-            background: #fff; border: 3px solid #fcfcfc; border-radius: 20px;
-            min-height: 130px; padding: 12px; position: relative; transition: 0.3s;
+        /* 未來計劃區域 */
+        .plan-layout { 
+            display: grid; grid-template-columns: repeat(auto-fit, minmax(380px, 1fr)); 
+            gap: 30px; margin-top: 40px; 
         }
-        .cal-cell.disabled { background: #f2f2f2; opacity: 0.5; pointer-events: none; }
-        .date-badge { font-weight: 900; font-size: 1.1rem; color: #444; margin-bottom: 8px; display: block; }
-
-        /* 事件標籤 - 拖拽核心 */
-        .event-item {
-            background: var(--theme-color); color: white; padding: 12px 18px;
-            border-radius: 18px; font-size: 1.1rem; margin-top: 10px;
-            cursor: grab; box-shadow: 0 5px 15px rgba(0,0,0,0.1);
-            word-break: break-all; touch-action: none;
+        .plan-box { 
+            background: #fdfdfd; border: 3px dashed #eee; border-radius: 40px; 
+            padding: 30px; min-height: 250px; transition: 0.3s;
         }
-        .event-item.dragging { opacity: 0.4; transform: scale(0.9); }
-
-        /* ❤️ 快捷愛愛按鈕 */
-        .btn-heart-tool {
-            position: fixed; right: 40px; bottom: 120px;
-            width: 85px; height: 85px; background: white; border: 4px solid var(--theme-color);
-            border-radius: 50%; font-size: 2.8rem; display: flex; align-items: center; justify-content: center;
-            cursor: pointer; z-index: 4000; box-shadow: var(--shadow-hard);
+        .plan-box:hover { border-color: var(--accent); background: #fff; }
+        .plan-input-group { display: flex; gap: 12px; margin-top: 25px; }
+        .plan-input-group input { 
+            flex: 1; border: 2px solid #f0f0f0; border-radius: 20px; 
+            padding: 18px 22px; font-size: 1.1rem; outline: none;
+        }
+        .plan-input-group button { 
+            border: none; background: var(--accent); color: white; 
+            border-radius: 20px; padding: 0 30px; font-weight: 900; font-size: 1.2rem;
         }
 
-        /* 🗑️ 右側垂直垃圾桶 */
-        #trash-bin-rail {
-            position: fixed; top: 0; right: 0; width: 0; height: 100%;
-            background: var(--danger-red); z-index: 7000; transition: 0.3s;
-            display: flex; align-items: center; justify-content: center; overflow: hidden;
+        /* --- 寶寶通訊 UI --- */
+        #chat-scroller { 
+            height: 72vh; overflow-y: auto; padding: 30px; 
+            background: #fff; border-radius: 40px; 
+            display: flex; flex-direction: column; gap: 25px; 
         }
-        #trash-bin-rail.active { width: 140px; }
-        .trash-text { 
-            writing-mode: vertical-rl; color: white; font-weight: 900; font-size: 2rem;
-            letter-spacing: 20px; white-space: nowrap;
+        .chat-row { display: flex; width: 100%; flex-direction: column; }
+        .chat-row.me { align-items: flex-end; }
+        .chat-row.you { align-items: flex-start; }
+        .chat-bubble { 
+            max-width: 80%; padding: 18px 25px; border-radius: 30px; 
+            font-size: 1.15rem; line-height: 1.6; position: relative; 
+            box-shadow: 0 5px 15px rgba(0,0,0,0.03);
+        }
+        .me .chat-bubble { background: var(--accent); color: white; border-bottom-right-radius: 8px; }
+        .you .chat-bubble { background: #f2f2f2; color: #222; border-bottom-left-radius: 8px; }
+        .chat-media { max-width: 100%; border-radius: 20px; margin-top: 12px; border: 4px solid white; box-shadow: var(--shadow-soft); }
+        .chat-timestamp { font-size: 0.75rem; color: #ccc; margin: 10px 5px 0; }
+
+        .chat-bar {
+            position: fixed; bottom: 0; left: 0; width: 100%; 
+            background: white; padding: 15px 25px 45px;
+            display: flex; align-items: center; gap: 18px; 
+            border-top: 1px solid #f0f0f0; z-index: 7500;
+        }
+        .chat-input-wrap { 
+            flex: 1; background: #f7f7f7; border-radius: 50px; 
+            padding: 0 25px; display: flex; align-items: center; 
+        }
+        .chat-input-wrap input { 
+            flex: 1; border: none; background: transparent; 
+            padding: 18px 0; font-size: 1.2rem; outline: none;
+        }
+        .btn-send-msg { 
+            background: #2ecc71; color: white; border: none; 
+            width: 60px; height: 60px; border-radius: 50%; 
+            font-size: 1.8rem; cursor: pointer; display: flex; align-items: center; justify-content: center;
         }
 
-        /* * ============================================================
-         * 6. 未來計劃模塊 (Planner Stack)
-         * ============================================================
-         */
-        .plan-column { background: #f9f9f9; border: 2px dashed #eee; border-radius: 30px; padding: 25px; }
-        .plan-header { font-size: 1.4rem; font-weight: 900; margin-bottom: 20px; color: #555; }
-        .drop-area { min-height: 150px; background: rgba(0,0,0,0.02); border-radius: 20px; padding: 15px; display: flex; flex-wrap: wrap; gap: 12px; }
-        .input-group { display: flex; gap: 10px; margin-top: 20px; }
-        .input-group input { flex: 1; border: 2px solid #eee; padding: 15px; border-radius: 15px; font-size: 1.1rem; outline: none; }
-        .input-group button { background: var(--theme-color); color: white; border: none; padding: 0 25px; border-radius: 15px; font-weight: 900; }
-
-        /* * ============================================================
-         * 7. 寶寶通訊 (Messenger UI)
-         * ============================================================
-         */
-        #chat-scroller { height: 60vh; overflow-y: auto; padding: 20px; display: flex; flex-direction: column; gap: 25px; }
-        .msg-frame { display: flex; width: 100%; }
-        .msg-frame.me { justify-content: flex-end; }
-        .msg-frame.you { justify-content: flex-start; }
+        /* --- 歷史紀錄 UI --- */
+        .history-card { 
+            background: white; padding: 30px; border-radius: 35px; 
+            margin-bottom: 25px; box-shadow: var(--shadow-soft); 
+            display: flex; justify-content: space-between; align-items: center;
+        }
+        .history-info strong { font-size: 1.25rem; color: #333; display: block; margin-bottom: 8px; }
+        .history-info small { color: #bbb; font-size: 0.9rem; }
+        .btn-history-del { color: #eee; font-size: 1.6rem; cursor: pointer; transition: 0.3s; }
+        .btn-history-del:hover { color: #ff3b30; }
         
-        .msg-bubble { 
-            max-width: 78%; padding: 20px 28px; border-radius: 35px; font-size: 1.2rem; line-height: 1.7;
-            position: relative; box-shadow: 0 4px 12px rgba(0,0,0,0.03);
-        }
-        .me .msg-bubble { background: var(--theme-color); color: white; border-bottom-right-radius: 5px; }
-        .you .msg-bubble { background: #f1f1f1; color: #111; border-bottom-left-radius: 5px; }
-        .msg-time { display: block; font-size: 0.7rem; opacity: 0.5; margin-top: 10px; text-align: right; }
-
-        .chat-bar { display: flex; align-items: center; gap: 15px; padding: 30px; border-top: 1px solid #f0f0f0; }
-        .btn-upload { font-size: 2.5rem; cursor: pointer; transition: 0.3s; filter: grayscale(1); }
-        .btn-upload:hover { filter: grayscale(0); }
-        .msg-input { flex: 1; background: #f5f5f5; border: none; padding: 22px 30px; border-radius: 50px; font-size: 1.2rem; outline: none; }
-        .btn-send { background: #2ecc71; color: white; border: none; padding: 20px 45px; border-radius: 50px; font-weight: 900; cursor: pointer; }
-
-        /* * ============================================================
-         * 8. 歷史紀錄 & 全域組件
-         * ============================================================
-         */
-        .hist-item { padding: 30px; border-bottom: 1px solid #f8f8f8; display: flex; justify-content: space-between; align-items: center; }
-        .btn-gemini-report {
-            position: fixed; bottom: 40px; left: 50%; transform: translateX(-50%);
-            background: linear-gradient(135deg, #a18cd1 0%, #fbc2eb 100%);
-            color: white; border: none; padding: 25px 60px; border-radius: 100px;
-            font-size: 1.4rem; font-weight: 900; cursor: pointer; box-shadow: 0 15px 35px rgba(161, 140, 209, 0.4);
+        #gemini-report-trigger {
+            position: fixed; bottom: 130px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(135deg, #6a11cb 0%, #2575fc 100%);
+            padding: 22px 45px; border-radius: 60px; color: white; 
+            font-weight: 900; border: none; font-size: 1.2rem;
+            box-shadow: 0 15px 40px rgba(37, 117, 252, 0.4);
         }
 
-        #toast-notification {
-            position: fixed; top: -120px; left: 50%; transform: translateX(-50%);
-            background: rgba(0,0,0,0.85); color: white; padding: 25px 70px;
-            border-radius: 100px; z-index: 20000; transition: top 0.6s var(--transition);
-            font-weight: 900; font-size: 1.2rem;
+        /* 手機適配細節 */
+        @media (max-width: 800px) {
+            .plan-layout { grid-template-columns: 1fr; }
+            .calendar-day-box { min-height: 105px; padding: 6px; border-radius: 12px; }
+            .calendar-day-label { font-size: 0.75rem; }
+            .tag-event { font-size: 0.75rem; padding: 6px 8px; }
+            .welcome-prompt { font-size: 2.2rem; }
+            .btn-identity { width: 85%; }
         }
-        #toast-notification.active { top: 50px; }
-
     </style>
 </head>
 <body>
 
-    <div id="portal-screen">
-        <h1 class="portal-hint">和你的Love Story</h1>
-        <div class="portal-btn-group">
-            <button class="btn-identity ysc" onclick="entryApp('ysc')">我是ysc</button>
-            <button class="btn-identity lcl" onclick="entryApp('lcl')">我是lcl</button>
-        </div>
+    <div id="identity-screen">
+        <div class="welcome-prompt">和你的Love Story</div>
+        <button class="btn-identity btn-ysc-main" onclick="startStory('ysc')">我是 ysc</button>
+        <button class="btn-identity btn-lcl-main" onclick="startStory('lcl')">我是 lcl</button>
     </div>
 
-    <div id="app-shell">
-        <header>
-            <nav class="navigation">
-                <button class="nav-link active" id="tab-cal" onclick="switchPage('cal')">紀念日曆</button>
-                <button class="nav-link" id="tab-chat" onclick="switchPage('chat')">寶寶通訊</button>
-                <button class="nav-link" id="tab-hist" onclick="switchPage('hist')">歷史紀錄</button>
-            </nav>
-            <button class="btn-undo-action" onclick="handleUndo()">↩️</button>
-        </header>
+    <button id="undo-master-btn" onclick="undoLastAction()">↩️</button>
+    <div id="dynamic-trash">RELEASE TO DELETE</div>
 
-        <div id="trash-bin-rail"><div class="trash-text">🗑️ 拖 到 此 處 刪 除</div></div>
-        <div id="toast-notification">通知內容</div>
+    <header>
+        <nav>
+            <button class="nav-link active" id="tab-cal" onclick="setView('cal')">紀念日曆</button>
+            <button class="nav-link" id="tab-chat" onclick="setView('chat')">寶寶通訊</button>
+            <button class="nav-link" id="tab-hist" onclick="setView('hist')">歷史紀錄</button>
+        </nav>
+    </header>
 
-        <main class="viewport">
-            
-            <section id="page-cal" class="page active">
-                <div class="card banner">
-                    <h1 class="counter-days" id="display-days">0 DAYS</h1>
-                    <p class="happiness-index" id="display-score">我們的幸福指數：0</p>
-                    <button class="btn-check-in" onclick="actionSign()">打卡</button>
+    <div class="main-scroller">
+        
+        <div id="view-cal" class="app-view active">
+            <div class="glass-card hero-stats">
+                <div class="text-together-days" id="days-counter">在一起 ... 日</div>
+                <div class="text-happy-index" id="happiness-display">我們的幸福指數：0.0</div>
+                <button class="btn-sign" onclick="handleSignSubmit()">打卡</button>
+            </div>
+
+            <div class="glass-card">
+                <span class="module-title">🔔 給對方的小提醒</span>
+                <div id="remind-list-container" style="margin-bottom: 20px;"></div>
+                <div class="plan-input-group">
+                    <input type="text" id="remind-msg-input" placeholder="填入的提示僅對方可見">
+                    <button onclick="sendPartnerReminder()">發送</button>
                 </div>
+            </div>
 
-                <div class="card">
-                    <h3 style="margin-bottom:20px;">📌 給對方的小提醒</h3>
-                    <div id="reminder-box"></div>
-                    <div class="input-group">
-                        <input type="text" id="rem-input" placeholder="填入的提示僅對方可見">
-                        <button onclick="actionSendRem()">發送</button>
-                    </div>
+            <div class="calendar-section">
+                <button class="btn-quick-heart" onclick="quickDropHeart()">❤️</button>
+                <div class="calendar-week-labels">
+                    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
                 </div>
+                <div id="calendar-render-target" class="calendar-grid"></div>
+            </div>
 
-                <div class="cal-container">
-                    <div class="card cal-main-area">
-                        <button class="btn-heart-tool" onclick="actionQuickHeart()">❤️</button>
-                        <div class="cal-wrapper">
-                            <div class="weekday-label">Sun</div><div class="weekday-label">Mon</div><div class="weekday-label">Tue</div>
-                            <div class="weekday-label">Wed</div><div class="weekday-label">Thu</div><div class="weekday-label">Fri</div><div class="weekday-label">Sat</div>
-                        </div>
-                        <div id="cal-engine" class="cal-wrapper"></div>
-                    </div>
-                </div>
-
-                <div class="planner-stack">
-                    <div class="plan-column">
-                        <div class="plan-header">🍔 豬癮犯了</div>
-                        <div class="drop-area" id="zone-eat"></div>
-                        <div class="input-group">
-                            <input type="text" id="in-eat" placeholder="想吃的...">
-                            <button onclick="actionAddPlan('eat')">+</button>
-                        </div>
-                    </div>
-                    <div class="plan-column">
-                        <div class="plan-header">📍 腳好累呀</div>
-                        <div class="drop-area" id="zone-go"></div>
-                        <div class="input-group">
-                            <input type="text" id="in-go" placeholder="想去的...">
-                            <button onclick="actionAddPlan('go')">+</button>
-                        </div>
-                    </div>
-                    <div class="plan-column">
-                        <div class="plan-header">🌈 好無聊呀</div>
-                        <div class="drop-area" id="zone-do"></div>
-                        <div class="input-group">
-                            <input type="text" id="in-do" placeholder="想做的...">
-                            <button onclick="actionAddPlan('do')">+</button>
-                        </div>
+            <div class="plan-layout">
+                <div class="plan-box" id="plan-eat-box">
+                    <span class="module-title">🍔 豬癮犯了</span>
+                    <div id="render-plan-eat"></div>
+                    <div class="plan-input-group">
+                        <input type="text" id="input-plan-eat" placeholder="想吃什麼...">
+                        <button onclick="submitNewPlan('eat')">+</button>
                     </div>
                 </div>
-            </section>
-
-            <section id="page-chat" class="page">
-                <div class="card" style="padding: 10px;">
-                    <div id="chat-scroller"></div>
-                    <div class="chat-bar">
-                        <label class="btn-upload">
-                            🖼️ <input type="file" id="media-input" style="display:none" accept="image/*">
-                        </label>
-                        <input type="text" id="chat-msg" class="msg-input" placeholder="對寶寶說點什麼...">
-                        <button class="btn-send" onclick="actionSendChat()">送出</button>
+                <div class="plan-box" id="plan-go-box">
+                    <span class="module-title">📍 腳好累呀</span>
+                    <div id="render-plan-go"></div>
+                    <div class="plan-input-group">
+                        <input type="text" id="input-plan-go" placeholder="想到哪裡...">
+                        <button onclick="submitNewPlan('go')">+</button>
                     </div>
                 </div>
-            </section>
+                <div class="plan-box" id="plan-do-box">
+                    <span class="module-title">✨ 好無聊呀</span>
+                    <div id="render-plan-do"></div>
+                    <div class="plan-input-group">
+                        <input type="text" id="input-plan-do" placeholder="想做什麼...">
+                        <button onclick="submitNewPlan('do')">+</button>
+                    </div>
+                </div>
+            </div>
+        </div>
 
-            <section id="page-hist" class="page">
-                <div class="card" style="padding: 0;" id="hist-engine"></div>
-                <button class="btn-gemini-report" onclick="triggerGeminiReport()">交給Gemini 生成我們的戀愛報告</button>
-            </section>
+        <div id="view-chat" class="app-view">
+            <div id="chat-scroller"></div>
+            <div class="chat-bar">
+                <input type="file" id="media-uploader" hidden accept="image/*" onchange="handleMediaSelect(this)">
+                <button style="border:none; background:none; font-size:2.2rem; cursor:pointer;" onclick="document.getElementById('media-uploader').click()">🖼️</button>
+                <div class="chat-input-wrap">
+                    <input type="text" id="chat-text-input" placeholder="說點好聽的...">
+                </div>
+                <button class="btn-send-msg" onclick="sendChatTextMessage()">↑</button>
+            </div>
+        </div>
 
-        </main>
+        <div id="view-hist" class="app-view">
+            <div id="history-container"></div>
+            <button id="gemini-report-trigger" onclick="alert('正在彙整數據交給 Gemini...')">交給 Gemini 生成我們的戀愛報告</button>
+        </div>
+
     </div>
 
     <script>
-        /**
-         * ============================================================
-         * 1. 核心工程數據結構與初始化
-         * ============================================================
-         */
-        const FIRE_BASE_CONFIG = {
+        // --- Firebase 基礎配置 ---
+        const FB_CONFIG = {
             apiKey: "AIzaSyDvzd2ZhT-HfuJoJ28S14cun-6D_wNILtg",
+            authDomain: "ourloveplanner.firebaseapp.com",
             databaseURL: "https://ourloveplanner-default-rtdb.firebaseio.com",
             projectId: "ourloveplanner",
-            storageBucket: "ourloveplanner.appspot.com",
+            storageBucket: "ourloveplanner.firebasestorage.app",
+            messagingSenderId: "671815155990",
             appId: "1:671815155990:web:ce0adcdd59f1778cb41037"
         };
-        firebase.initializeApp(FIRE_BASE_CONFIG);
-        const db = firebase.database();
-        const storage = firebase.storage();
+        firebase.initializeApp(FB_CONFIG);
+        const rtdb = firebase.database();
 
         let CURRENT_USER = '';
-        let PARTNER_USER = '';
-        let UNDO_QUEUE = []; // 用於無限撤回的棧
-        let ACTIVE_DRAG = null;
-        const EPOCH = new Date('2024-09-18');
+        let HISTORY_UNDO_STACK = [];
+        let ACTIVE_DRAG_ITEM = null;
+        const TOGETHER_DAY_ONE = new Date('2024-09-18');
 
-        function entryApp(role) {
+        // --- 初始化入口 ---
+        function startStory(role) {
             CURRENT_USER = role;
-            PARTNER_USER = (role === 'ysc' ? 'lcl' : 'ysc');
+            document.getElementById('identity-screen').style.display = 'none';
+            document.documentElement.style.setProperty('--accent', role === 'ysc' ? 'var(--ysc-color)' : 'var(--lcl-color)');
             
-            const mainColor = (role === 'ysc' ? 'var(--ysc-blue-gray)' : 'var(--lcl-pink)');
-            document.documentElement.style.setProperty('--theme-color', mainColor);
+            // 計算在一起天數
+            const now = new Date();
+            const daysCount = Math.floor((now - TOGETHER_DAY_ONE) / (1000 * 60 * 60 * 24)) + 1;
+            document.getElementById('days-counter').innerText = `在一起 ${daysCount} 日`;
             
-            document.getElementById('portal-screen').style.display = 'none';
-            document.getElementById('app-shell').style.display = 'flex';
-            
-            initDataStreaming();
-            initPhotoLink();
-            automationGuard();
+            startRealtimeSync();
+            runBackgroundBot();
         }
 
-        function switchPage(target) {
-            document.querySelectorAll('.page, .nav-link').forEach(el => el.classList.remove('active'));
-            document.getElementById('page-' + target).classList.add('active');
-            document.getElementById('tab-' + target).classList.add('active');
+        function setView(viewId) {
+            document.querySelectorAll('.app-view, .nav-link').forEach(el => el.classList.remove('active'));
+            document.getElementById('view-'+viewId).classList.add('active');
+            document.getElementById('tab-'+viewId).classList.add('active');
+            if(viewId === 'chat') {
+                const s = document.getElementById('chat-scroller');
+                s.scrollTop = s.scrollHeight;
+            }
         }
 
-        /**
-         * ============================================================
-         * 2. 原子拖拽與垃圾桶系統 (Atomic DnD Engine)
-         * ============================================================
-         */
-        function registerPhysics(el, info) {
-            el.onpointerdown = (e) => {
-                e.stopPropagation();
-                ACTIVE_DRAG = { ...info, element: el };
-                el.classList.add('dragging');
-                document.getElementById('trash-bin-rail').classList.add('active');
-                el.setPointerCapture(e.pointerId);
-            };
-
-            el.onpointerup = async (e) => {
-                if(!ACTIVE_DRAG) return;
-                
-                const rail = document.getElementById('trash-bin-rail');
-                const dropTarget = document.elementFromPoint(e.clientX, e.clientY);
-                
-                const cell = dropTarget ? dropTarget.closest('.cal-cell') : null;
-                const zone = dropTarget ? dropTarget.closest('.drop-area') : null;
-                const isTrash = dropTarget ? dropTarget.closest('#trash-bin-rail') : null;
-
-                const snap = await db.ref('story_v8').once('value');
-                const state = snap.val() || {};
-                const backup = JSON.parse(JSON.stringify(state)); // 撤回備份
-
-                // --- 物理第一定律：原件消失 ---
-                if(ACTIVE_DRAG.from === 'cal') {
-                    delete state.calendar[ACTIVE_DRAG.date][ACTIVE_DRAG.id];
-                } else if(ACTIVE_DRAG.from === 'plan') {
-                    delete state.planner[ACTIVE_DRAG.cat][ACTIVE_DRAG.id];
-                }
-
-                let moved = false;
-                let logMsg = "";
-
-                if(isTrash) {
-                    logMsg = `刪除了項目：${ACTIVE_DRAG.val}`;
-                    moved = true;
-                } 
-                else if(cell && !cell.classList.contains('disabled')) {
-                    const newDate = cell.dataset.date;
-                    if(!state.calendar) state.calendar = {};
-                    if(!state.calendar[newDate]) state.calendar[newDate] = {};
-                    state.calendar[newDate][Date.now()] = ACTIVE_DRAG.val;
-                    logMsg = `移動 ${ACTIVE_DRAG.val} 到 ${newDate}`;
-                    moved = true;
-                }
-                else if(zone) {
-                    const cat = zone.id.split('-')[1];
-                    if(!state.planner) state.planner = {};
-                    if(!state.planner[cat]) state.planner[cat] = {};
-                    state.planner[cat][Date.now()] = ACTIVE_DRAG.val;
-                    logMsg = `移動 ${ACTIVE_DRAG.val} 到計劃清單`;
-                    moved = true;
-                }
-
-                // --- 物理第二定律：狀態更新 ---
-                if(moved) {
-                    await db.ref('story_v8').set(state);
-                    pushUndo(() => db.ref('story_v8').set(backup), logMsg);
-                    toast(logMsg);
-                } else {
-                    // 若無效釋放，原樣寫回
-                    db.ref('story_v8').set(backup);
-                }
-
-                rail.classList.remove('active');
-                el.classList.remove('dragging');
-                ACTIVE_DRAG = null;
-            };
+        // --- 無限次撤回邏輯 (全量快照) ---
+        async function recordState(label) {
+            const snap = await rtdb.ref('love_v25').once('value');
+            HISTORY_UNDO_STACK.push({ snapshot: snap.val(), actionName: label });
+            // 保留 100 步撤回空間
+            if(HISTORY_UNDO_STACK.length > 100) HISTORY_UNDO_STACK.shift();
         }
 
-        /**
-         * ============================================================
-         * 3. 撤回與通知邏輯 (Undo Stack)
-         * ============================================================
-         */
-        function pushUndo(fn, desc) {
-            UNDO_QUEUE.push({ run: fn, desc: desc });
-        }
-
-        async function handleUndo() {
-            if(UNDO_QUEUE.length === 0) {
-                toast("沒有可撤回的操作");
+        function undoLastAction() {
+            if(HISTORY_UNDO_STACK.length === 0) {
+                alert("沒有可撤回的操作");
                 return;
             }
-            const task = UNDO_QUEUE.pop();
-            await task.run();
-            toast(`已撤回：${task.desc}`);
+            const lastState = HISTORY_UNDO_STACK.pop();
+            rtdb.ref('love_v25').set(lastState.snapshot);
+            alert(`已撤回：${lastState.actionName}`);
         }
 
-        function toast(m) {
-            const t = document.getElementById('toast-notification');
-            t.innerText = m; t.classList.add('active');
-            setTimeout(() => t.classList.remove('active'), 3000);
-        }
-
-        /**
-         * ============================================================
-         * 4. 業務功能：打卡、提醒、日曆渲染
-         * ============================================================
-         */
-        async function actionSign() {
-            const iso = new Date().toISOString().split('T')[0];
-            const snap = await db.ref(`story_v8/signs/${iso}/${CURRENT_USER}`).once('value');
-            if(snap.exists()) {
-                toast("提示今天已經打過卡啦");
-            } else {
-                await db.ref(`story_v8/signs/${iso}/${CURRENT_USER}`).set(true);
-                toast("打卡成功，今天又是填滿愛的一天！");
-                pushUndo(() => db.ref(`story_v8/signs/${iso}/${CURRENT_USER}`).remove(), "每日認證打卡");
-            }
-        }
-
-        async function actionSendRem() {
-            const inp = document.getElementById('rem-input');
-            if(!inp.value) return;
-            const ref = db.ref(`story_v8/reminders/${PARTNER_USER}`).push();
-            const val = inp.value;
-            await ref.set(val);
-            inp.value = '';
-            toast("心意已發送給對方");
-            pushUndo(() => ref.remove(), `發送提醒：${val}`);
-        }
-
-        async function resolveRem(id, text) {
-            const ts = new Date().toLocaleString('zh-HK');
-            await db.ref(`story_v8/reminders/${CURRENT_USER}/${id}`).remove();
-            const hRef = db.ref('story_v8/history').push();
-            await hRef.set({ text: `完成了提醒：${text}`, time: ts });
-            
-            pushUndo(async () => {
-                await db.ref(`story_v8/reminders/${CURRENT_USER}/${id}`).set(text);
-                await hRef.remove();
-            }, "勾選提醒已讀");
-        }
-
-        async function actionQuickHeart() {
-            const iso = new Date().toISOString().split('T')[0];
-            const ref = db.ref(`story_v8/calendar/${iso}`).push();
-            await ref.set('❤️');
-            pushUndo(() => ref.remove(), "添加一顆愛心");
-        }
-
-        async function actionAddPlan(cat) {
-            const inp = document.getElementById('in-' + cat);
-            if(!inp.value) return;
-            const ref = db.ref(`story_v8/planner/${cat}`).push();
-            const val = inp.value;
-            await ref.set(val);
-            inp.value = '';
-            pushUndo(() => ref.remove(), `添加計劃：${val}`);
-        }
-
-        /**
-         * ============================================================
-         * 5. 數據流與 UI 渲染引擎 (Rendering)
-         * ============================================================
-         */
-        function initDataStreaming() {
-            db.ref('story_v8').on('value', snap => {
+        // --- 實時數據同步 ---
+        function startRealtimeSync() {
+            rtdb.ref('love_v25').on('value', snap => {
                 const data = snap.val() || {};
-                renderCal(data.calendar || {});
-                renderPlanner(data.planner || {});
-                renderRems(data.reminders || {});
-                renderChats(data.chats || {});
-                renderHistory(data.history || {});
-                refreshStats(data);
+                renderCalendarUI(data.calendar || {});
+                renderPartnerReminders(data.reminders || {});
+                renderFuturePlans(data.plans || {});
+                renderChatFlow(data.chats || {});
+                renderHistoryLog(data.history || {});
+                updateHappinessIndex(data.calendar || {}, data.signs || {});
             });
         }
 
-        function renderCal(cal) {
-            const eng = document.getElementById('cal-engine');
-            eng.innerHTML = '';
-            const today = new Date(); today.setHours(0,0,0,0);
-            const start = new Date(today); start.setDate(today.getDate() - today.getDay());
+        // --- 日曆渲染與唯一性拖拽 (重點修復) ---
+        function renderCalendarUI(calData) {
+            const container = document.getElementById('calendar-render-target');
+            container.innerHTML = '';
+            const today = new Date();
+            const mondayStart = new Date(today);
+            mondayStart.setDate(today.getDate() - today.getDay());
+
+            const monNames = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
 
             for(let i=0; i<35; i++) {
-                const d = new Date(start); d.setDate(start.getDate() + i);
-                const iso = d.toISOString().split('T')[0];
-                const isPast = d < today;
+                const cursor = new Date(mondayStart);
+                cursor.setDate(mondayStart.getDate() + i);
+                const iso = cursor.toISOString().split('T')[0];
+                const isLocked = cursor < new Date().setHours(0,0,0,0);
 
                 const cell = document.createElement('div');
-                cell.className = `cal-cell ${isPast ? 'disabled' : ''}`;
+                cell.className = `calendar-day-box ${isLocked ? 'is-locked' : ''}`;
                 cell.dataset.date = iso;
-                
-                const monStr = ["Jan","Feb","Mar","Apr","May","Jun","Jul","Aug","Sep","Oct","Nov","Dec"];
-                cell.innerHTML = `<span class="date-badge">${d.getDate()}/${monStr[d.getMonth()]}</span>`;
+                cell.innerHTML = `<span class="calendar-day-label">${cursor.getDate()}/${monNames[cursor.getMonth()]}</span>`;
 
-                if(cal[iso]) {
-                    Object.entries(cal[iso]).forEach(([id, val]) => {
-                        const tag = document.createElement('div');
-                        tag.className = 'event-item';
-                        tag.innerText = val;
-                        registerPhysics(tag, { from: 'cal', date: iso, id, val });
+                if(calData[iso]) {
+                    Object.entries(calData[iso]).forEach(([evId, evVal]) => {
+                        const tag = createEventTag(evVal, { source: 'CALENDAR', date: iso, id: evId, content: evVal });
                         cell.appendChild(tag);
                     });
                 }
 
-                if(!isPast) {
-                    cell.onclick = (e) => {
-                        if(e.target === cell) {
-                            const v = prompt("在這一天要做什麼？");
-                            if(v) db.ref(`story_v8/calendar/${iso}`).push(v);
-                        }
-                    };
-                }
-                eng.appendChild(cell);
+                cell.onclick = (e) => {
+                    if(e.target === cell && !isLocked) {
+                        const txt = prompt("為這一天添加事件：");
+                        if(txt) commitData(`calendar/${iso}`, txt, "添加日曆事件");
+                    }
+                };
+                container.appendChild(cell);
             }
         }
 
-        function renderPlanner(p) {
-            ['eat','go','do'].forEach(c => {
-                const z = document.getElementById('zone-' + c);
-                z.innerHTML = '';
-                if(p[c]) {
-                    Object.entries(p[c]).forEach(([id, val]) => {
-                        const tag = document.createElement('div');
-                        tag.className = 'event-item';
-                        tag.innerText = val;
-                        registerPhysics(tag, { from: 'plan', cat: c, id, val });
-                        z.appendChild(tag);
-                    });
-                }
-            });
-        }
-
-        function renderRems(rems) {
-            const box = document.getElementById('reminder-box');
-            box.innerHTML = '';
-            const myData = rems[CURRENT_USER] || {};
-            Object.entries(myData).forEach(([id, txt]) => {
-                const el = document.createElement('div');
-                el.style = "padding:20px; background:#fffafa; border-radius:20px; border:1px solid #ffeef0; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center;";
-                el.innerHTML = `<span>💌 ${txt}</span><button onclick="resolveRem('${id}','${txt}')" style="background:none; border:none; color:var(--success-green); font-size:1.5rem; cursor:pointer;">✅</button>`;
-                box.appendChild(el);
-            });
-        }
-
-        /**
-         * ============================================================
-         * 6. 通訊系統與照片鏈路修復
-         * ============================================================
-         */
-        function initPhotoLink() {
-            const fileIn = document.getElementById('media-input');
-            fileIn.onchange = async (e) => {
-                const file = e.target.files[0];
-                if(!file) return;
-                toast("正在同步照片...");
-                try {
-                    const path = `story_v8_media/${Date.now()}_${file.name}`;
-                    const ref = storage.ref(path);
-                    const task = await ref.put(file);
-                    const url = await task.ref.getDownloadURL();
-                    
-                    db.ref('story_v8/chats').push({
-                        sender: CURRENT_USER,
-                        type: 'img',
-                        content: url,
-                        time: new Date().toLocaleString('zh-HK', { hour12: false })
-                    });
-                } catch(err) {
-                    toast("上傳失敗，請稍後再試");
-                }
+        function createEventTag(text, meta) {
+            const el = document.createElement('div');
+            el.className = 'tag-event';
+            el.innerText = text;
+            el.draggable = true;
+            
+            // 桌面端拖拽
+            el.ondragstart = () => {
+                ACTIVE_DRAG_ITEM = meta;
+                document.getElementById('dynamic-trash').classList.add('active');
             };
+            el.ondragend = () => document.getElementById('dynamic-trash').classList.remove('active');
+
+            // 手機端拖拽 (Touch Events)
+            el.ontouchstart = (e) => {
+                ACTIVE_DRAG_ITEM = meta;
+                document.getElementById('dynamic-trash').classList.add('active');
+            };
+            el.ontouchend = (e) => {
+                const touch = e.changedTouches[0];
+                const targetEl = document.elementFromPoint(touch.clientX, touch.clientY);
+                processDropEvent(targetEl);
+                document.getElementById('dynamic-trash').classList.remove('active');
+            };
+
+            return el;
         }
 
-        function actionSendChat() {
-            const inp = document.getElementById('chat-msg');
+        function processDropEvent(target) {
+            if(!ACTIVE_DRAG_ITEM) return;
+            const trash = document.getElementById('dynamic-trash');
+
+            // 1. 刪除邏輯
+            if(target === trash || trash.contains(target)) {
+                recordState(`刪除 ${ACTIVE_DRAG_ITEM.content}`);
+                if(ACTIVE_DRAG_ITEM.source === 'CALENDAR') {
+                    rtdb.ref(`love_v25/calendar/${ACTIVE_DRAG_ITEM.date}/${ACTIVE_DRAG_ITEM.id}`).remove();
+                } else {
+                    rtdb.ref(`love_v25/plans/${ACTIVE_DRAG_ITEM.category}/${ACTIVE_DRAG_ITEM.id}`).remove();
+                }
+                ACTIVE_DRAG_ITEM = null;
+                return;
+            }
+
+            // 2. 移動到日曆邏輯 (保證唯一性：先刪後加)
+            const cell = target.closest('.calendar-day-box');
+            if(cell) {
+                const targetDate = cell.dataset.date;
+                recordState(`移動 ${ACTIVE_DRAG_ITEM.content} 至日曆`);
+                // 刪除原本的
+                if(ACTIVE_DRAG_ITEM.source === 'CALENDAR') {
+                    rtdb.ref(`love_v25/calendar/${ACTIVE_DRAG_ITEM.date}/${ACTIVE_DRAG_ITEM.id}`).remove();
+                } else {
+                    rtdb.ref(`love_v25/plans/${ACTIVE_DRAG_ITEM.category}/${ACTIVE_DRAG_ITEM.id}`).remove();
+                }
+                // 寫入新的
+                rtdb.ref(`love_v25/calendar/${targetDate}`).push(ACTIVE_DRAG_ITEM.content);
+                ACTIVE_DRAG_ITEM = null;
+                return;
+            }
+
+            // 3. 移動到計劃邏輯
+            const planBox = target.closest('.plan-box');
+            if(planBox) {
+                const targetCat = planBox.id.replace('plan-', '').replace('-box', '');
+                recordState(`將 ${ACTIVE_DRAG_ITEM.content} 存入計劃`);
+                if(ACTIVE_DRAG_ITEM.source === 'CALENDAR') {
+                    rtdb.ref(`love_v25/calendar/${ACTIVE_DRAG_ITEM.date}/${ACTIVE_DRAG_ITEM.id}`).remove();
+                } else {
+                    rtdb.ref(`love_v25/plans/${ACTIVE_DRAG_ITEM.category}/${ACTIVE_DRAG_ITEM.id}`).remove();
+                }
+                rtdb.ref(`love_v25/plans/${targetCat}`).push(ACTIVE_DRAG_ITEM.content);
+                ACTIVE_DRAG_ITEM = null;
+            }
+        }
+
+        // --- 幸福指數與打卡 ---
+        async function handleSignSubmit() {
+            const todayKey = new Date().toISOString().split('T')[0];
+            const snap = await rtdb.ref(`love_v25/signs/${todayKey}/${CURRENT_USER}`).once('value');
+            if(snap.exists()) {
+                alert("今天已經打過卡啦");
+                return;
+            }
+            recordState("打卡操作");
+            rtdb.ref(`love_v25/signs/${todayKey}/${CURRENT_USER}`).set(true);
+            alert("打卡成功，今天又是填滿愛的一天！");
+        }
+
+        function updateHappinessIndex(cal, signs) {
+            const threshold = new Date();
+            threshold.setDate(threshold.getDate() - 30);
+            let love=0, bomb=0, signCount=0;
+
+            // 統計❤️與💣
+            Object.entries(cal).forEach(([date, items]) => {
+                if(new Date(date) >= threshold) {
+                    Object.values(items).forEach(v => {
+                        if(v === '❤️') love++;
+                        if(v === '💣') bomb++;
+                    });
+                }
+            });
+
+            // 統計打卡
+            Object.entries(signs || {}).forEach(([date, users]) => {
+                if(new Date(date) >= threshold) {
+                    signCount += Object.keys(users).length;
+                }
+            });
+
+            const score = (love - bomb) * 7 + signCount;
+            document.getElementById('happiness-display').innerText = `我們的幸福指數：${score.toFixed(1)}`;
+        }
+
+        // --- 小提醒功能 ---
+        function sendPartnerReminder() {
+            const input = document.getElementById('remind-msg-input');
+            const targetUser = CURRENT_USER === 'ysc' ? 'lcl' : 'ysc';
+            if(!input.value) return;
+            recordState("發送提醒");
+            rtdb.ref(`love_v25/reminders/${targetUser}`).push({
+                text: input.value, from: CURRENT_USER, ts: Date.now()
+            });
+            input.value = '';
+        }
+
+        function renderPartnerReminders(rems) {
+            const list = document.getElementById('remind-list-container');
+            list.innerHTML = '';
+            const myRems = rems[CURRENT_USER] || {};
+            Object.entries(myRems).forEach(([id, data]) => {
+                const div = document.createElement('div');
+                div.style = "background:#fff5f7; padding:20px; border-radius:20px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center; border:1px solid #ffeef1;";
+                div.innerHTML = `
+                    <span style="font-size:1.15rem; color:#d63384; font-weight:800;">💌 ${data.text}</span>
+                    <button onclick="readReminder('${id}', '${data.text}')" style="background:none; border:none; font-size:1.8rem; cursor:pointer;">✅</button>
+                `;
+                list.appendChild(div);
+            });
+        }
+
+        function readReminder(id, msg) {
+            recordState("已讀提醒");
+            rtdb.ref(`love_v25/reminders/${CURRENT_USER}/${id}`).remove();
+            logToHistory(`已讀消息：${msg}`);
+        }
+
+        // --- 通訊功能 (含修復相片) ---
+        function sendChatTextMessage() {
+            const inp = document.getElementById('chat-text-input');
             if(!inp.value) return;
-            const ref = db.ref('story_v8/chats').push();
-            const val = inp.value;
-            ref.set({
-                sender: CURRENT_USER,
-                type: 'text',
-                content: val,
-                time: new Date().toLocaleString('zh-HK', { hour12: false })
+            rtdb.ref('love_v25/chats').push({
+                mode: 'TEXT', content: inp.value, sender: CURRENT_USER, ts: Date.now()
             });
             inp.value = '';
-            pushUndo(() => ref.remove(), `撤回訊息：${val}`);
         }
 
-        function renderChats(chats) {
-            const scroller = document.getElementById('chat-scroller');
-            scroller.innerHTML = '';
-            Object.values(chats || {}).forEach(m => {
+        function handleMediaSelect(input) {
+            const file = input.files[0];
+            if(!file) return;
+            const reader = new FileReader();
+            reader.onload = (ev) => {
+                rtdb.ref('love_v25/chats').push({
+                    mode: 'IMAGE', content: ev.target.result, sender: CURRENT_USER, ts: Date.now()
+                });
+            };
+            reader.readAsDataURL(file);
+        }
+
+        function renderChatFlow(chats) {
+            const box = document.getElementById('chat-scroller');
+            box.innerHTML = '';
+            Object.entries(chats).forEach(([id, m]) => {
                 const row = document.createElement('div');
-                row.className = `msg-frame ${m.sender === CURRENT_USER ? 'me' : 'you'}`;
-                
-                let body = m.content;
-                if(m.type === 'img') body = `<img src="${m.content}" style="max-width:100%; border-radius:20px; cursor:zoom-in" onclick="window.open('${m.content}')">`;
-                
-                row.innerHTML = `<div class="msg-bubble">${body}<span class="msg-time">${m.time}</span></div>`;
-                scroller.appendChild(row);
+                row.className = `chat-row ${m.sender === CURRENT_USER ? 'me' : 'you'}`;
+                let body = m.mode === 'TEXT' ? m.content : `<img src="${m.content}" class="chat-media">`;
+                row.innerHTML = `
+                    <div class="chat-bubble">${body}</div>
+                    <div class="chat-timestamp">${new Date(m.ts).toLocaleString()}</div>
+                `;
+                box.appendChild(row);
             });
-            scroller.scrollTop = scroller.scrollHeight;
+            box.scrollTop = box.scrollHeight;
         }
 
-        /**
-         * ============================================================
-         * 7. 數據統計、自動化與 Gemini 報告
-         * ============================================================
-         */
-        function refreshStats(data) {
-            const diff = Math.ceil((Date.now() - EPOCH.getTime()) / 86400000);
-            document.getElementById('display-days').innerText = `${diff} DAYS`;
+        // --- 歷史紀錄與自動化 ---
+        function logToHistory(action) {
+            const d = new Date();
+            const timeStr = `${d.getFullYear()}-${d.getMonth()+1}-${d.getDate()} ${d.getHours()}:${d.getMinutes()}`;
+            rtdb.ref('love_v25/history').push({ action, time: timeStr });
+        }
 
-            const thirtyDaysAgo = new Date(); thirtyDaysAgo.setDate(thirtyDaysAgo.getDate() - 30);
-            let love = 0, bomb = 0, sign = 0;
+        function renderHistoryLog(hist) {
+            const target = document.getElementById('history-container');
+            target.innerHTML = '';
+            Object.entries(hist).reverse().forEach(([id, item]) => {
+                const card = document.createElement('div');
+                card.className = 'history-card';
+                card.innerHTML = `
+                    <div class="history-info">
+                        <strong>${item.action}</strong>
+                        <small>${item.time}</small>
+                    </div>
+                    <div class="btn-history-del" onclick="deleteHistory('${id}')">🗑️</div>
+                `;
+                target.appendChild(card);
+            });
+        }
 
-            if(data.calendar) {
-                Object.entries(data.calendar).forEach(([date, items]) => {
-                    if(new Date(date) >= thirtyDaysAgo) {
-                        Object.values(items).forEach(v => {
-                            if(v === '❤️') love++;
-                            if(v === '💣') bomb++;
-                        });
+        function deleteHistory(id) {
+            recordState("刪除歷史條目");
+            rtdb.ref(`love_v25/history/${id}`).remove();
+        }
+
+        function runBackgroundBot() {
+            // 每日吵架檢測 (23:59:59)
+            setInterval(async () => {
+                const n = new Date();
+                if(n.getHours() === 23 && n.getMinutes() === 59 && n.getSeconds() === 59) {
+                    const todayKey = n.toISOString().split('T')[0];
+                    const snap = await rtdb.ref(`love_v25/signs/${todayKey}`).once('value');
+                    if(!snap.exists()) {
+                        rtdb.ref(`love_v25/calendar/${todayKey}`).push('💣');
+                        logToHistory("💣好像和寶寶吵架了");
                     }
-                });
-            }
-            if(data.signs) {
-                Object.entries(data.signs).forEach(([date, users]) => {
-                    if(new Date(date) >= thirtyDaysAgo) sign += Object.keys(users).length;
-                });
-            }
+                }
+            }, 1000);
 
-            const score = (love - bomb) * 7 + sign;
-            document.getElementById('display-score').innerText = `我們的幸福指數：${score}`;
+            // 余尚初的小替身邏輯 (8-12am)
+            if(CURRENT_USER === 'ysc') {
+                const dayTag = 'bot_sent_' + new Date().toDateString();
+                if(!localStorage.getItem(dayTag)) {
+                    const delay = (Math.random() * 5 + 2) * 1000; // 模擬隨機
+                    setTimeout(() => {
+                        rtdb.ref('love_v25/chats').push({
+                            mode: 'TEXT', content: "我是余尚初的小替身，他偷偷告訴我說他想你了🥺", sender: 'ysc', ts: Date.now()
+                        });
+                        localStorage.setItem(dayTag, 'true');
+                    }, delay);
+                }
+            }
         }
 
-        function renderHistory(h) {
-            const eng = document.getElementById('hist-engine');
-            eng.innerHTML = '';
-            Object.entries(h || {}).reverse().forEach(([id, item]) => {
-                const row = document.createElement('div');
-                row.className = 'hist-item';
-                row.innerHTML = `<div><b>${item.text}</b><br><small style="color:#aaa">${item.time}</small></div><button onclick="db.ref('story_v8/history/${id}').remove()">🗑️</button>`;
-                eng.appendChild(row);
+        // --- 其他輔助功能 ---
+        function commitData(path, val, log) {
+            recordState(log);
+            rtdb.ref('love_v25/' + path).push(val);
+            logToHistory(log);
+        }
+
+        function submitNewPlan(cat) {
+            const inp = document.getElementById('input-plan-'+cat);
+            if(inp.value) commitData(`plans/${cat}`, inp.value, `添加計劃：${inp.value}`);
+            inp.value = '';
+        }
+
+        function renderFuturePlans(plans) {
+            ['eat','go','do'].forEach(cat => {
+                const box = document.getElementById('render-plan-'+cat);
+                box.innerHTML = '';
+                Object.entries(plans[cat] || {}).forEach(([id, val]) => {
+                    box.appendChild(createEventTag(val, { source: 'PLAN', category: cat, id: id, content: val }));
+                });
             });
         }
 
-        function triggerGeminiReport() {
-            const choice = prompt("請輸入生成的規模：一週 / 一個月 / 一年", "一週");
-            if(choice) toast(`正在打包數據，請稍候...`);
+        function quickDropHeart() {
+            const today = new Date().toISOString().split('T')[0];
+            commitData(`calendar/${today}`, '❤️', "添加了一個 ❤️");
         }
 
-        async function automationGuard() {
-            // 自動檢測吵架與替身語句 (核心邏輯：檢測當天是否有更新，若無則凌晨補入💣)
-            // 由於 JavaScript 前端環境限制，此部分建議配合 Firebase Functions，此處保留冗餘變量用於擴展。
-            const checkTime = new Date().getHours();
-            if(CURRENT_USER === 'ysc' && checkTime >= 8 && checkTime <= 12) {
-                // 模擬隨機時刻替身發言 (省略隨機算法以保持穩定)
-            }
-        }
-
-        // 禁止默認上下文菜單
-        window.oncontextmenu = (e) => { if(e.target.tagName !== 'INPUT') e.preventDefault(); };
-
+        // 全局拖放支持
+        window.ondragover = (e) => e.preventDefault();
+        window.ondrop = (e) => {
+            const target = document.elementFromPoint(e.clientX, e.clientY);
+            processDropEvent(target);
+        };
     </script>
 </body>
 </html>
