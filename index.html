@@ -3,7 +3,7 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Our Love Story - Full Version</title>
+    <title>Our Love Story - Refined Full Version</title>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     
@@ -35,7 +35,7 @@
             margin: 0; 
             padding: 0;
             overflow-x: hidden; 
-            touch-action: none; /* 防止移動端默認縮放，由 JS 控制滑動 */
+            touch-action: pan-y; 
         }
 
         /* --- 身分選擇頁面 (Identity Screen) --- */
@@ -73,14 +73,8 @@
             overflow: hidden;
         }
         .btn-identity:active { transform: scale(0.92); }
-        .btn-ysc-main { 
-            background: var(--ysc-color); 
-            box-shadow: 0 10px 30px rgba(96, 125, 139, 0.4); 
-        }
-        .btn-lcl-main { 
-            background: var(--lcl-color); 
-            box-shadow: 0 10px 30px rgba(255, 175, 189, 0.4); 
-        }
+        .btn-ysc-main { background: var(--ysc-color); box-shadow: 0 10px 30px rgba(96, 125, 139, 0.4); }
+        .btn-lcl-main { background: var(--lcl-color); box-shadow: 0 10px 30px rgba(255, 175, 189, 0.4); }
 
         /* --- 頂部導航與全局撤回 --- */
         header {
@@ -108,10 +102,7 @@
             cursor: pointer; 
             transition: var(--transition-fast); 
         }
-        .nav-link.active { 
-            color: var(--accent); 
-            transform: scale(1.15); 
-        }
+        .nav-link.active { color: var(--accent); transform: scale(1.15); }
 
         #undo-master-btn {
             position: fixed; 
@@ -131,14 +122,13 @@
             font-size: 1.8rem;
             transition: var(--transition-fast);
         }
-        #undo-master-btn:hover { transform: rotate(-30deg); background: #fafafa; }
 
         /* --- 手機優化垃圾桶 --- */
         #dynamic-trash {
             position: fixed; 
             top: 0; 
-            right: -105px; 
-            width: 95px; 
+            right: -95px; 
+            width: 85px; 
             height: 100vh;
             background: #ff4d4d; 
             color: white; 
@@ -147,21 +137,19 @@
             justify-content: center;
             writing-mode: vertical-rl; 
             font-weight: 900; 
-            letter-spacing: 15px; 
+            letter-spacing: 12px; 
             z-index: 8500;
             transition: 0.4s var(--curve); 
-            font-size: 1.8rem;
+            font-size: 1.6rem;
             box-shadow: -5px 0 25px rgba(255, 77, 77, 0.4);
         }
-        #dynamic-trash.active { 
-            right: 0; 
-        }
+        #dynamic-trash.active { right: 0; }
 
         /* --- 容器與組件 --- */
         .main-scroller { 
             max-width: 1300px; 
             margin: 0 auto; 
-            padding: 25px; 
+            padding: 15px; /* 手機端縮小邊距 */
             height: calc(100vh - 80px);
             overflow-y: auto;
             touch-action: pan-y;
@@ -176,57 +164,63 @@
 
         .glass-card { 
             background: var(--white); 
-            border-radius: 40px; 
-            padding: 35px; 
-            margin-bottom: 35px; 
+            border-radius: 35px; 
+            padding: 25px; 
+            margin-bottom: 25px; 
             box-shadow: var(--shadow-standard); 
             position: relative; 
-            border: 1px solid rgba(255,255,255,0.3);
         }
 
-        /* --- 1. 紀念日曆模塊 --- */
+        /* --- 1. 紀念日曆模塊 - 手機大圖優化 --- */
         .hero-stats { text-align: center; }
-        .text-together-days { font-size: 2.0rem; font-weight: 900; color: var(--accent); margin: 0; letter-spacing: -1px; }
-        .text-happy-index { font-size: 1.25rem; color: #b0b0b0; margin: 15px 0 30px; font-weight: 500; }
+        .text-together-days { 
+            font-size: 1.8rem; /* 已縮小字號 */
+            font-weight: 900; 
+            color: var(--accent); 
+            margin: 0; 
+            letter-spacing: -0.5px; 
+        }
+        .text-happy-index { font-size: 1.1rem; color: #b0b0b0; margin: 10px 0 20px; font-weight: 500; }
         .btn-sign-daily {
-            padding: 18px 65px; 
-            border-radius: 60px; 
+            padding: 15px 55px; 
+            border-radius: 50px; 
             border: none; 
             background: var(--accent);
             color: white; 
             font-weight: bold; 
-            font-size: 1.3rem; 
+            font-size: 1.2rem; 
             cursor: pointer; 
             box-shadow: 0 8px 20px rgba(0,0,0,0.1);
-            transition: 0.3s;
         }
 
         @media (min-width: 1024px) {
             .calendar-workspace { display: grid; grid-template-columns: 2.8fr 1.2fr; gap: 40px; }
         }
 
-        /* 日曆適配核心代碼 */
+        /* 日曆去框化優化 */
+        .calendar-container-flat { 
+            padding: 5px 0; /* 移除左右多餘邊距，讓日曆更大 */
+        }
         .calendar-week-labels { 
             display: grid; 
             grid-template-columns: repeat(7, 1fr); 
             text-align: center; 
-            padding: 15px 0; 
-            color: var(--gray-deep); 
+            padding: 12px 0; 
+            color: var(--gray-deep); /* 星期深灰色 */
             font-weight: 900; 
-            font-size: 0.95rem; 
-            text-transform: uppercase;
+            font-size: 0.85rem; 
         }
         .calendar-main-grid { 
             display: grid; 
             grid-template-columns: repeat(7, minmax(0, 1fr)); 
-            gap: 8px; 
+            gap: 4px; /* 縮小格子間距 */
         }
         .calendar-day-box {
             background: #fff; 
-            border: 1.5px solid #fcfcfc; 
-            border-radius: 20px; 
-            min-height: 115px; 
-            padding: 10px;
+            border: 1px solid #f2f2f2; 
+            border-radius: 12px; 
+            min-height: 95px; 
+            padding: 5px;
             display: flex; 
             flex-direction: column; 
             transition: 0.2s; 
@@ -234,199 +228,183 @@
             overflow: hidden;
         }
         @media (max-width: 600px) {
-            .calendar-day-box { min-height: 85px; padding: 6px; border-radius: 12px; }
+            .calendar-day-box { min-height: 80px; } /* 手機端格子高度 */
         }
-        .calendar-day-box.is-locked { background: #f8f8f8; color: #e0e0e0 !important; cursor: not-allowed; }
-        .calendar-day-label { font-size: 0.85rem; font-weight: 800; color: var(--gray-mid); margin-bottom: 8px; }
+        .calendar-day-box.is-locked { background: #fdfdfd; color: #e5e5e5 !important; }
+        .calendar-day-label { 
+            font-size: 0.75rem; 
+            font-weight: 800; 
+            color: var(--gray-mid); /* 日期中灰色 */
+            margin-bottom: 4px; 
+        }
 
         .tag-event {
             background: var(--accent); 
             color: white; 
-            font-size: 0.8rem; 
-            padding: 7px 12px; 
-            border-radius: 12px;
-            margin-top: 6px; 
+            font-size: 0.75rem; 
+            padding: 5px 8px; 
+            border-radius: 8px;
+            margin-top: 4px; 
             word-break: break-all; 
             cursor: grab; 
-            line-height: 1.3; 
-            box-shadow: 0 4px 12px rgba(0,0,0,0.06);
+            line-height: 1.2; 
             white-space: nowrap; 
             overflow: hidden; 
             text-overflow: ellipsis;
-            z-index: 5;
         }
         .tag-event.dragging-active { 
             position: fixed; 
             pointer-events: none; 
             z-index: 11000; 
             width: auto !important; 
-            max-width: 180px;
-            opacity: 0.9;
-            transform: scale(1.15);
-            box-shadow: 0 25px 50px rgba(0,0,0,0.25);
+            max-width: 150px;
+            transform: scale(1.1);
         }
 
-        .heart-shortcut-anchor { position: absolute; right: -25px; top: 35px; }
+        .heart-shortcut-anchor { position: absolute; right: -15px; top: 20px; }
         .btn-heart-pulse { 
-            width: 65px; 
-            height: 65px; 
+            width: 55px; 
+            height: 55px; 
             border-radius: 50%; 
-            border: 4px solid var(--accent); 
+            border: 3px solid var(--accent); 
             background: white; 
             color: var(--accent); 
-            font-size: 1.7rem; 
+            font-size: 1.4rem; 
             cursor: pointer; 
             box-shadow: var(--shadow-standard);
-            transition: 0.3s;
         }
-        .btn-heart-pulse:active { transform: scale(1.2); }
 
         /* 未來計劃 */
         .plan-category-box { 
             background: #fafafa; 
-            border: 3px dashed #eee; 
-            border-radius: 35px; 
-            padding: 28px; 
-            min-height: 180px; 
-            margin-bottom: 30px; 
+            border: 2px dashed #eee; 
+            border-radius: 30px; 
+            padding: 22px; 
+            min-height: 160px; 
+            margin-bottom: 25px; 
         }
         .plan-category-box h4 { 
-            margin: 0 0 18px 0; 
-            font-size: 1.15rem; 
-            color: var(--gray-plan); 
+            margin: 0 0 15px 0; 
+            font-size: 1.15rem; /* 標準字號 */
+            color: var(--gray-plan); /* 極深灰色 */
             font-weight: 900; 
-            letter-spacing: 1px;
         }
-        .plan-input-row { display: flex; gap: 12px; margin-top: 25px; }
+        .plan-input-row { display: flex; gap: 8px; margin-top: 15px; }
         .plan-input-row input { 
             flex: 1; 
             border: 2px solid #f0f0f0; 
-            border-radius: 18px; 
-            padding: 14px 20px; 
-            font-size: 1rem; 
-            transition: 0.3s;
+            border-radius: 12px; 
+            padding: 12px 15px; 
+            font-size: 0.9rem; 
         }
-        .plan-input-row input:focus { border-color: var(--accent); background: white; }
         .plan-input-row button { 
             border: none; 
             background: var(--accent); 
             color: white; 
-            border-radius: 18px; 
-            padding: 0 28px; 
+            border-radius: 12px; 
+            padding: 0 20px; 
             font-weight: 900; 
-            font-size: 1.4rem;
         }
 
         /* --- 2. 寶寶通訊 --- */
         #chat-message-container { 
-            height: 70vh; 
+            height: 68vh; 
             overflow-y: auto; 
-            padding: 25px; 
+            padding: 20px; 
             display: flex; 
             flex-direction: column; 
-            gap: 25px; 
+            gap: 20px; 
             background: #fff;
-            border-radius: 30px;
+            border-radius: 25px;
         }
         .chat-bubble-row { display: flex; flex-direction: column; width: 100%; }
         .chat-bubble-row.me { align-items: flex-end; }
         .chat-bubble-row.you { align-items: flex-start; }
         .chat-msg-body { 
-            max-width: 80%; 
-            padding: 18px 25px; 
-            border-radius: 32px; 
-            font-size: 1.15rem; 
-            line-height: 1.6; 
-            position: relative;
+            max-width: 85%; 
+            padding: 15px 20px; 
+            border-radius: 25px; 
+            font-size: 1.05rem; 
+            line-height: 1.5; 
         }
-        .me .chat-msg-body { background: var(--accent); color: white; border-bottom-right-radius: 8px; }
-        .you .chat-msg-body { background: #f1f1f1; color: #333; border-bottom-left-radius: 8px; }
-        .chat-msg-time { font-size: 0.75rem; color: #ccc; margin-top: 10px; letter-spacing: 0.5px; }
+        .me .chat-msg-body { background: var(--accent); color: white; border-bottom-right-radius: 5px; }
+        .you .chat-msg-body { background: #f4f4f4; color: #333; border-bottom-left-radius: 5px; }
+        .chat-msg-time { font-size: 0.7rem; color: #ccc; margin-top: 8px; }
 
         .chat-dock-fixed {
             position: fixed; 
             bottom: 0; left: 0; 
             width: 100%; 
             background: white; 
-            padding: 20px 30px 45px;
+            padding: 15px 20px 40px;
             display: flex; 
             align-items: center; 
-            gap: 20px; 
+            gap: 15px; 
             border-top: 1px solid #f0f0f0; 
             z-index: 7500;
         }
         .chat-input-pill { 
             flex: 1; 
             background: #f7f7f7; 
-            border-radius: 45px; 
+            border-radius: 40px; 
             display: flex; 
             align-items: center; 
-            padding: 5px 25px; 
+            padding: 0 20px; 
         }
         .chat-input-pill input { 
             flex: 1; 
             border: none; 
             background: transparent; 
-            padding: 16px 0; 
-            font-size: 1.1rem; 
+            padding: 14px 0; 
+            font-size: 1rem; 
         }
         .btn-chat-send { 
             background: #4caf50; 
             color: white; 
             border: none; 
-            width: 58px; 
-            height: 58px; 
+            width: 50px; 
+            height: 50px; 
             border-radius: 50%; 
             cursor: pointer; 
-            font-size: 1.6rem; 
+            font-size: 1.4rem; 
             display: flex; 
             align-items: center; 
             justify-content: center;
-            box-shadow: 0 6px 15px rgba(76, 175, 80, 0.3);
         }
 
         /* --- 3. 歷史紀錄 --- */
         .history-card-item { 
-            padding: 30px; 
-            border-bottom: 2px solid #fafafa; 
+            padding: 25px; 
+            border-bottom: 1.5px solid #fafafa; 
             position: relative; 
-            transition: 0.3s;
         }
-        .history-card-item:hover { background: #fffafb; }
-        .history-main-label { display: block; font-weight: 900; color: #444; font-size: 1.25rem; margin-bottom: 10px; }
-        .history-date-label { font-size: 0.9rem; color: #bbb; }
+        .history-main-label { display: block; font-weight: 900; color: #444; font-size: 1.15rem; margin-bottom: 8px; }
+        .history-date-label { font-size: 0.8rem; color: #bbb; }
         .btn-history-delete { 
             position: absolute; 
-            right: 30px; 
-            top: 35px; 
-            color: #eee; 
+            right: 25px; 
+            top: 30px; 
+            color: #ddd; 
             cursor: pointer; 
-            font-size: 1.5rem; 
-            transition: 0.2s;
+            font-size: 1.3rem; 
         }
-        .btn-history-delete:hover { color: #ff4d4d; }
 
         #gemini-report-trigger {
             position: fixed; 
-            bottom: 130px; 
+            bottom: 120px; 
             left: 50%; 
             transform: translateX(-50%);
             background: linear-gradient(45deg, #ff9a9e, #fad0c4, #a1c4fd, #c2e9fb);
-            background-size: 300% 300%; 
-            animation: rainbowFlow 6s infinite;
-            padding: 22px 50px; 
-            border-radius: 80px; 
+            background-size: 200%; 
+            padding: 20px 45px; 
+            border-radius: 70px; 
             color: white; 
             border: none; 
             font-weight: 900;
-            box-shadow: 0 15px 45px rgba(0,0,0,0.18); 
+            box-shadow: 0 10px 35px rgba(0,0,0,0.15); 
             cursor: pointer; 
             z-index: 7000; 
-            font-size: 1.3rem;
-            letter-spacing: 1px;
-        }
-        @keyframes rainbowFlow { 
-            0% {background-position:0% 50%} 50% {background-position:100% 50%} 100% {background-position:0% 50%} 
+            font-size: 1.15rem;
         }
     </style>
 </head>
@@ -455,21 +433,21 @@
             <div class="glass-card hero-stats">
                 <p class="text-together-days" id="val-together-days">在一起 0 日</p>
                 <p class="text-happy-index" id="val-happiness-score">我們的幸福指數：0.0</p>
-                <button class="btn-sign-daily" id="action-sign-btn" onclick="executeSignAction()">打卡</button>
+                <button class="btn-sign-daily" onclick="executeSignAction()">打卡</button>
             </div>
 
             <div class="calendar-workspace">
                 <div class="calendar-column-left">
                     <div class="glass-card">
-                        <small style="color:#000; font-weight:900; letter-spacing:1px; text-transform:uppercase; ">🔔 給對方的小提醒</small>
-                        <div id="reminder-display-list" style="margin-top:25px;"></div>
+                        <small style="color:#000; font-weight:900; letter-spacing:1px; text-transform:uppercase; font-size:1.15rem;">🔔 給對方的小提醒</small>
+                        <div id="reminder-display-list" style="margin-top:20px;"></div>
                         <div class="plan-input-row">
                             <input type="text" id="remind-msg-input" placeholder="填入的提示僅對方可見">
                             <button onclick="submitRemindToPartner()">發送</button>
-                        </div
+                        </div>
                     </div>
 
-                    <div class="glass-card">
+                    <div class="calendar-container-flat">
                         <div class="heart-shortcut-anchor">
                             <button class="btn-heart-pulse" onclick="quickAddHeartToCalendar()">❤️</button>
                         </div>
@@ -480,12 +458,12 @@
                     </div>
                 </div>
 
-                <div class="plan-column-right">
+                <div class="plan-column-right" style="margin-top:25px;">
                     <div class="plan-category-box" id="pbox-eat">
                         <h4>🍔 豬癮犯了</h4>
                         <div class="plan-render-list" id="list-render-eat"></div>
                         <div class="plan-input-row">
-                            <input type="text" id="in-plan-eat" placeholder="添加想吃的...">
+                            <input type="text" id="in-plan-eat" placeholder="想吃什麼...">
                             <button onclick="createNewPlanItem('eat')">+</button>
                         </div>
                     </div>
@@ -493,7 +471,7 @@
                         <h4>📍 腳好累呀</h4>
                         <div class="plan-render-list" id="list-render-go"></div>
                         <div class="plan-input-row">
-                            <input type="text" id="in-plan-go" placeholder="想去的地方...">
+                            <input type="text" id="in-plan-go" placeholder="想到哪裡...">
                             <button onclick="createNewPlanItem('go')">+</button>
                         </div>
                     </div>
@@ -501,7 +479,7 @@
                         <h4>✨ 好無聊呀</h4>
                         <div class="plan-render-list" id="list-render-do"></div>
                         <div class="plan-input-row">
-                            <input type="text" id="in-plan-do" placeholder="想做的事情...">
+                            <input type="text" id="in-plan-do" placeholder="想做什麼...">
                             <button onclick="createNewPlanItem('do')">+</button>
                         </div>
                     </div>
@@ -513,7 +491,7 @@
             <div id="chat-message-container"></div>
             <div class="chat-dock-fixed">
                 <input type="file" id="chat-file-upload" hidden accept="image/*" onchange="processChatImage(this)">
-                <span style="font-size: 2.2rem; cursor:pointer;" onclick="document.getElementById('chat-file-upload').click()">🖼️</span>
+                <span style="font-size: 2rem; cursor:pointer;" onclick="document.getElementById('chat-file-upload').click()">🖼️</span>
                 <div class="chat-input-pill">
                     <input type="text" id="chat-text-field" placeholder="傳送甜蜜訊息...">
                 </div>
@@ -529,9 +507,7 @@
     </div>
 
     <script>
-        /**
-         * 1. 全局配置與 Firebase 初始化
-         */
+        // Firebase 配置
         const FB_CONFIG = {
             apiKey: "AIzaSyDvzd2ZhT-HfuJoJ28S14cun-6D_wNILtg",
             authDomain: "ourloveplanner.firebaseapp.com",
@@ -544,193 +520,112 @@
         firebase.initializeApp(FB_CONFIG);
         const rtdb = firebase.database();
 
-        let CURRENT_USER = ''; // ysc 或 lcl
+        let CURRENT_USER = '';
         let UNDO_STACK = []; 
-        let DRAG_CONTEXT = null; // 存儲當前拖拽對象
-        let DRAG_MIRROR_DOM = null; // 存儲拖拽時跟隨手指的虛影
+        let DRAG_CONTEXT = null; 
+        let DRAG_MIRROR_DOM = null; 
         const DATE_RELATIONSHIP_START = new Date('2024-09-18');
 
-        /**
-         * 2. 啟動與路由系統
-         */
         function startApp(userRole) {
             CURRENT_USER = userRole;
-            document.getElementById('identity-screen').style.opacity = '0';
-            setTimeout(() => {
-                document.getElementById('identity-screen').style.display = 'none';
-            }, 500);
-
-            // 設置主題顏色
-            const themeColor = userRole === 'ysc' ? 'var(--ysc-color)' : 'var(--lcl-color)';
-            document.documentElement.style.setProperty('--accent', themeColor);
+            document.getElementById('identity-screen').style.display = 'none';
+            document.documentElement.style.setProperty('--accent', userRole === 'ysc' ? 'var(--ysc-color)' : 'var(--lcl-color)');
             
-            // 初始化在一起天數
-            const timeDiff = Math.abs(new Date() - DATE_RELATIONSHIP_START);
-            const daysCount = Math.ceil(timeDiff / (1000 * 60 * 60 * 24));
+            const daysCount = Math.ceil(Math.abs(new Date() - DATE_RELATIONSHIP_START) / (1000 * 60 * 60 * 24));
             document.getElementById('val-together-days').innerText = `在一起 ${daysCount} 日`;
             
-            // 開始同步數據
             initializeDataSynchronization();
-            // 啟動自動化後台
             runBackgroundAutomations();
         }
 
         function navigateTo(targetId) {
-            document.querySelectorAll('.app-view').forEach(v => v.classList.remove('active'));
-            document.querySelectorAll('.nav-link').forEach(l => l.classList.remove('active'));
-            
+            document.querySelectorAll('.app-view, .nav-link').forEach(el => el.classList.remove('active'));
             document.getElementById('view-' + targetId).classList.add('active');
             document.getElementById('btn-nav-' + targetId).classList.add('active');
-            
             if(targetId === 'chat') {
-                const scroll = document.getElementById('chat-message-container');
-                scroll.scrollTop = scroll.scrollHeight;
+                const s = document.getElementById('chat-message-container');
+                s.scrollTop = s.scrollHeight;
             }
         }
 
-        /**
-         * 3. 核心撤回系統 (Infinite Undo)
-         */
         async function createSystemSnapshot(actionLabel) {
-            const snapshot = await rtdb.ref('love_v10_full').once('value');
-            UNDO_STACK.push({ 
-                payload: snapshot.val(), 
-                label: actionLabel 
-            });
+            const snapshot = await rtdb.ref('love_v11_clean').once('value');
+            UNDO_STACK.push({ payload: snapshot.val(), label: actionLabel });
         }
 
         function handleUndoSystem() {
-            if (UNDO_STACK.length === 0) {
-                alert("沒有可撤回的操作");
-                return;
-            }
+            if (!UNDO_STACK.length) return alert("沒有可撤回的操作");
             const lastPoint = UNDO_STACK.pop();
-            rtdb.ref('love_v10_full').set(lastPoint.payload);
-            const msg = `已撤回操作：「${lastPoint.label}」`;
-            alert(msg);
+            rtdb.ref('love_v11_clean').set(lastPoint.payload);
+            alert(`已撤回：${lastPoint.label}`);
         }
 
-        /**
-         * 4. 數據同步與渲染中心
-         */
         function initializeDataSynchronization() {
-            rtdb.ref('love_v10_full').on('value', snapshot => {
+            rtdb.ref('love_v11_clean').on('value', snapshot => {
                 const data = snapshot.val() || {};
-                
-                // 渲染各模塊
                 renderCalendarModule(data.calendar || {});
                 renderReminderModule(data.reminders || {});
                 renderPlanModule(data.plans || {});
                 renderChatModule(data.chats || {});
                 renderHistoryModule(data.history || {});
-                
-                // 更新指數
                 calculateHappinessMetric(data.calendar || {}, data.signs || {});
             });
         }
 
-        /**
-         * 5. 拖拽引擎 (解決手機溢出與適配)
-         */
+        // 拖拽邏輯
         function setupDraggable(domElement, metadata) {
             const handleStart = (posX, posY) => {
                 DRAG_CONTEXT = metadata;
                 DRAG_MIRROR_DOM = domElement.cloneNode(true);
                 DRAG_MIRROR_DOM.classList.add('tag-event', 'dragging-active');
-                
-                // 修正手機端的寬度顯示
-                DRAG_MIRROR_DOM.style.width = domElement.offsetWidth + 'px';
                 DRAG_MIRROR_DOM.style.left = posX - 30 + 'px';
                 DRAG_MIRROR_DOM.style.top = posY - 15 + 'px';
-                
                 document.body.appendChild(DRAG_MIRROR_DOM);
                 document.getElementById('dynamic-trash').classList.add('active');
             };
-
             domElement.onmousedown = (e) => handleStart(e.clientX, e.clientY);
-            domElement.ontouchstart = (e) => {
-                // 防止手機滑動干擾
-                handleStart(e.touches[0].clientX, e.touches[0].clientY);
-            };
+            domElement.ontouchstart = (e) => handleStart(e.touches[0].clientX, e.touches[0].clientY);
         }
 
         window.onmousemove = window.ontouchmove = (e) => {
             if (!DRAG_MIRROR_DOM) return;
             const x = e.clientX || (e.touches ? e.touches[0].clientX : 0);
             const y = e.clientY || (e.touches ? e.touches[0].clientY : 0);
-            
             DRAG_MIRROR_DOM.style.left = x - 30 + 'px';
             DRAG_MIRROR_DOM.style.top = y - 15 + 'px';
         };
 
         window.onmouseup = window.ontouchend = (e) => {
             if (!DRAG_MIRROR_DOM) return;
-            
             const finalX = e.clientX || (e.changedTouches ? e.changedTouches[0].clientX : 0);
             const finalY = e.clientY || (e.changedTouches ? e.changedTouches[0].clientY : 0);
+            const target = document.elementFromPoint(finalX, finalY);
             
-            const dropTarget = document.elementFromPoint(finalX, finalY);
-            processDropAction(dropTarget);
-
-            // 清理
-            DRAG_MIRROR_DOM.remove();
-            DRAG_MIRROR_DOM = null;
-            DRAG_CONTEXT = null;
-            document.getElementById('dynamic-trash').classList.remove('active');
+            const trash = document.getElementById('dynamic-trash');
+            if (target === trash || trash.contains(target)) {
+                createSystemSnapshot(`刪除 ${DRAG_CONTEXT.val}`);
+                if (DRAG_CONTEXT.source === 'CAL') rtdb.ref(`love_v11_clean/calendar/${DRAG_CONTEXT.date}/${DRAG_CONTEXT.id}`).remove();
+                else rtdb.ref(`love_v11_clean/plans/${DRAG_CONTEXT.cat}/${DRAG_CONTEXT.id}`).remove();
+            } else {
+                const dayBox = target.closest('.calendar-day-box');
+                if (dayBox) {
+                    const newDate = dayBox.dataset.date;
+                    createSystemSnapshot(`移動 ${DRAG_CONTEXT.val}`);
+                    if (DRAG_CONTEXT.source === 'CAL') rtdb.ref(`love_v11_clean/calendar/${DRAG_CONTEXT.date}/${DRAG_CONTEXT.id}`).remove();
+                    else rtdb.ref(`love_v11_clean/plans/${DRAG_CONTEXT.cat}/${DRAG_CONTEXT.id}`).remove();
+                    rtdb.ref(`love_v11_clean/calendar/${newDate}`).push(DRAG_CONTEXT.val);
+                }
+            }
+            DRAG_MIRROR_DOM.remove(); DRAG_MIRROR_DOM = null; DRAG_CONTEXT = null;
+            trash.classList.remove('active');
         };
 
-        function processDropAction(target) {
-            if (!DRAG_CONTEXT) return;
-            
-            const trashDom = document.getElementById('dynamic-trash');
-            let destinationType = null;
-            let destinationKey = null;
-
-            if (target === trashDom || trashDom.contains(target)) {
-                destinationType = 'DELETE';
-            } else {
-                const dayBox = target.closest('.calendar-day-box:not(.is-locked)');
-                const planBox = target.closest('.plan-category-box');
-                
-                if (dayBox) {
-                    destinationType = 'CALENDAR';
-                    destinationKey = dayBox.dataset.date;
-                } else if (planBox) {
-                    destinationType = 'PLAN';
-                    destinationKey = planBox.id.replace('pbox-', '');
-                }
-            }
-
-            if (destinationType) {
-                createSystemSnapshot(`拖動事件: ${DRAG_CONTEXT.val}`);
-                
-                // 先從源頭移除
-                if (DRAG_CONTEXT.source === 'CAL') {
-                    rtdb.ref(`love_v10_full/calendar/${DRAG_CONTEXT.date}/${DRAG_CONTEXT.id}`).remove();
-                } else {
-                    rtdb.ref(`love_v10_full/plans/${DRAG_CONTEXT.cat}/${DRAG_CONTEXT.id}`).remove();
-                }
-
-                // 如果不是刪除，則寫入新地址
-                if (destinationType === 'CALENDAR') {
-                    rtdb.ref(`love_v10_full/calendar/${destinationKey}`).push(DRAG_CONTEXT.val);
-                } else if (destinationType === 'PLAN') {
-                    rtdb.ref(`love_v10_full/plans/${destinationKey}`).push(DRAG_CONTEXT.val);
-                }
-            }
-        }
-
-        /**
-         * 6. 模塊渲染邏輯
-         */
         function renderCalendarModule(calData) {
             const grid = document.getElementById('calendar-render-grid');
             grid.innerHTML = '';
-            
             const today = new Date();
             const startPoint = new Date(today);
-            startPoint.setDate(today.getDate() - today.getDay()); // 本周日
-
+            startPoint.setDate(today.getDate() - today.getDay());
             const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
 
             for (let i = 0; i < 35; i++) {
@@ -747,17 +642,15 @@
                 if (calData[isoKey]) {
                     Object.entries(calData[isoKey]).forEach(([id, val]) => {
                         const tag = document.createElement('div');
-                        tag.className = 'tag-event';
-                        tag.innerText = val;
+                        tag.className = 'tag-event'; tag.innerText = val;
                         setupDraggable(tag, { source: 'CAL', date: isoKey, id, val });
                         cell.appendChild(tag);
                     });
                 }
-
                 cell.onclick = (e) => {
                     if (e.target === cell) {
-                        const txt = prompt("為這一天添加事件：");
-                        if (txt) sendDataToPath(`calendar/${isoKey}`, txt, `日曆添加: ${txt}`);
+                        const txt = prompt("添加事件：");
+                        if (txt) sendDataToPath(`calendar/${isoKey}`, txt, `添加: ${txt}`);
                     }
                 };
                 grid.appendChild(cell);
@@ -768,11 +661,9 @@
             ['eat', 'go', 'do'].forEach(type => {
                 const listDom = document.getElementById('list-render-' + type);
                 listDom.innerHTML = '';
-                const items = plans[type] || {};
-                Object.entries(items).forEach(([id, val]) => {
+                Object.entries(plans[type] || {}).forEach(([id, val]) => {
                     const tag = document.createElement('div');
-                    tag.className = 'tag-event';
-                    tag.innerText = val;
+                    tag.className = 'tag-event'; tag.innerText = val;
                     setupDraggable(tag, { source: 'PLAN', cat: type, id, val });
                     listDom.appendChild(tag);
                 });
@@ -782,199 +673,120 @@
         function renderReminderModule(reminders) {
             const area = document.getElementById('reminder-display-list');
             area.innerHTML = '';
-            const myRems = reminders[CURRENT_USER] || {};
-            
-            Object.entries(myRems).forEach(([id, info]) => {
+            Object.entries(reminders[CURRENT_USER] || {}).forEach(([id, info]) => {
                 const card = document.createElement('div');
                 card.className = 'glass-card';
-                card.style = "padding:20px; margin-bottom:15px; display:flex; justify-content:space-between; align-items:center; border:2px solid #fff0f3;";
-                card.innerHTML = `
-                    <span style="font-weight:bold; color:#333;">💌 ${info.msg}</span>
-                    <button onclick="confirmAndClearReminder('${id}', '${info.msg}')" style="background:none; border:none; cursor:pointer; font-size:2rem;">✅</button>
-                `;
+                card.style = "padding:15px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;";
+                card.innerHTML = `<span>💌 ${info.msg}</span><button onclick="clearReminder('${id}')" style="background:none; border:none; font-size:1.8rem;">✅</button>`;
                 area.appendChild(card);
             });
         }
 
-        /**
-         * 7. 業務邏輯與自動化
-         */
         function sendDataToPath(path, val, logMsg) {
             createSystemSnapshot(logMsg);
-            rtdb.ref('love_v10_full/' + path).push(val);
-            if (!path.includes('chats')) recordToHistoryList(logMsg, true);
-            rtdb.ref('love_v10_full/last_interaction_ts').set(Date.now());
+            rtdb.ref('love_v11_clean/' + path).push(val);
+            if (!path.includes('chats')) recordToHistory(logMsg);
+            rtdb.ref('love_v11_clean/last_interaction').set(Date.now());
         }
 
         async function executeSignAction() {
             const todayK = new Date().toISOString().split('T')[0];
-            const checkRef = rtdb.ref(`love_v10_full/signs/${todayK}/${CURRENT_USER}`);
-            const checkSnap = await checkRef.once('value');
-            
-            if (checkSnap.exists()) {
-                alert("提示今天已經打過卡啦");
-                return;
-            }
-            createSystemSnapshot("每日打卡");
-            checkRef.set(true);
-            recordToHistoryList("打卡成功，今天又是填滿愛的一天！");
-            alert("打卡成功，今天又是填滿愛的一天！");
+            const check = await rtdb.ref(`love_v11_clean/signs/${todayK}/${CURRENT_USER}`).once('value');
+            if (check.exists()) return alert("今天已打過卡啦");
+            createSystemSnapshot("打卡");
+            rtdb.ref(`love_v11_clean/signs/${todayK}/${CURRENT_USER}`).set(true);
+            recordToHistory("今日打卡成功！");
         }
 
-        function recordToHistoryList(content, precise = false) {
+        function recordToHistory(txt) {
             const d = new Date();
-            const timeStr = precise ? 
-                `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日 ${d.getHours()}:${d.getMinutes()}` :
-                `${d.getFullYear()}年${d.getMonth()+1}月${d.getDate()}日`;
-            rtdb.ref('love_v10_full/history').push({ text: content, ts: timeStr });
+            const timeStr = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${d.getMinutes()}`;
+            rtdb.ref('love_v11_clean/history').push({ text: txt, ts: timeStr });
         }
 
         function calculateHappinessMetric(cal, signs) {
-            let loveCount = 0, bombCount = 0, signCount = 0;
-            const threshold = Date.now() - 30 * 24 * 60 * 60 * 1000;
-            
-            Object.entries(cal).forEach(([date, items]) => {
-                if (new Date(date) > threshold) {
-                    Object.values(items).forEach(v => {
-                        if(v.includes('❤️')) loveCount++;
-                        if(v.includes('💣')) bombCount++;
-                    });
-                }
+            let l = 0, b = 0, s = 0;
+            const limit = Date.now() - 30 * 86400000;
+            Object.entries(cal).forEach(([d, items]) => {
+                if (new Date(d) > limit) Object.values(items).forEach(v => {
+                    if(v.includes('❤️')) l++; if(v.includes('💣')) b++;
+                });
             });
-
-            Object.entries(signs || {}).forEach(([date, users]) => {
-                if (new Date(date) > threshold) {
-                    signCount += Object.keys(users).length;
-                }
-            });
-
-            const score = (loveCount - bombCount) * 7 + signCount;
-            document.getElementById('val-happiness-score').innerText = `我們的幸福指數：${score.toFixed(1)}`;
+            Object.entries(signs || {}).forEach(([d, us]) => { if (new Date(d) > limit) s += Object.keys(us).length; });
+            document.getElementById('val-happiness-score').innerText = `我們的幸福指數：${((l - b) * 7 + s).toFixed(1)}`;
         }
 
         function runBackgroundAutomations() {
-            // 吵架偵測：每晚 23:59:59
             setInterval(async () => {
-                const now = new Date();
-                if (now.getHours() === 23 && now.getMinutes() === 59 && now.getSeconds() === 59) {
-                    const snap = await rtdb.ref('love_v10_full').once('value');
+                const n = new Date();
+                if (n.getHours() === 23 && n.getMinutes() === 59 && n.getSeconds() === 59) {
+                    const snap = await rtdb.ref('love_v11_clean').once('value');
                     const d = snap.val() || {};
-                    const last = d.last_interaction_ts || 0;
-                    if (Date.now() - last > 86400000) {
-                        const todayStr = now.toISOString().split('T')[0];
-                        rtdb.ref(`love_v10_full/calendar/${todayStr}`).push('💣');
-                        recordToHistoryList("💣好像和寶寶吵架了", true);
+                    if (Date.now() - (d.last_interaction || 0) > 86400000) {
+                        rtdb.ref(`love_v11_clean/calendar/${n.toISOString().split('T')[0]}`).push('💣');
+                        recordToHistory("💣好像和寶寶吵架了");
                     }
                 }
             }, 1000);
-
-            // ysc 替身訊息
             if (CURRENT_USER === 'ysc') {
-                const key = 'bot_lock_' + new Date().toDateString();
-                if (!localStorage.getItem(key)) {
-                    const randomTime = (Math.floor(Math.random() * 4) + 8) * 3600000;
+                const k = 'bot_v11_' + new Date().toDateString();
+                if (!localStorage.getItem(k)) {
                     setTimeout(() => {
-                        rtdb.ref('love_v10_full/chats').push({
-                            type: 'text',
-                            val: "我是余尚初的小替身，他偷偷告訴我說他想你了🥺",
-                            sender: 'ysc',
-                            ts: Date.now()
-                        });
-                        localStorage.setItem(key, 'done');
-                    }, randomTime);
+                        rtdb.ref('love_v11_clean/chats').push({ type: 'text', val: "我是余尚初的小替身，他偷偷告訴我說他想你了🥺", sender: 'ysc', ts: Date.now() });
+                        localStorage.setItem(k, '1');
+                    }, Math.random() * 4 * 3600000 + 8 * 3600000);
                 }
             }
         }
 
-        /**
-         * 8. 其他 UI 輔助函數 (通訊與歷史)
-         */
         function sendChatTextMessage() {
-            const field = document.getElementById('chat-text-field');
-            if (!field.value) return;
-            rtdb.ref('love_v10_full/chats').push({
-                type: 'text',
-                val: field.value,
-                sender: CURRENT_USER,
-                ts: Date.now()
-            });
-            rtdb.ref('love_v10_full/last_interaction_ts').set(Date.now());
-            field.value = '';
+            const f = document.getElementById('chat-text-field');
+            if (!f.value) return;
+            rtdb.ref('love_v11_clean/chats').push({ type: 'text', val: f.value, sender: CURRENT_USER, ts: Date.now() });
+            f.value = '';
         }
 
         function renderChatModule(chats) {
-            const container = document.getElementById('chat-message-container');
-            container.innerHTML = '';
+            const c = document.getElementById('chat-message-container');
+            c.innerHTML = '';
             Object.entries(chats).forEach(([id, m]) => {
                 const row = document.createElement('div');
                 row.className = `chat-bubble-row ${m.sender === CURRENT_USER ? 'me' : 'you'}`;
-                row.innerHTML = `
-                    <div class="chat-msg-body">${m.val}</div>
-                    <div class="chat-msg-time">${new Date(m.ts).toLocaleString()}</div>
-                `;
-                row.oncontextmenu = (e) => {
-                    e.preventDefault();
-                    if(confirm("撤回這條訊息？")) {
-                        createSystemSnapshot("撤回通訊訊息");
-                        rtdb.ref(`love_v10_full/chats/${id}`).remove();
-                    }
-                };
-                container.appendChild(row);
+                row.innerHTML = `<div class="chat-msg-body">${m.val}</div><div class="chat-msg-time">${new Date(m.ts).toLocaleString()}</div>`;
+                c.appendChild(row);
             });
-            container.scrollTop = container.scrollHeight;
+            c.scrollTop = c.scrollHeight;
         }
 
         function renderHistoryModule(hist) {
-            const list = document.getElementById('history-master-list');
-            list.innerHTML = '';
+            const l = document.getElementById('history-master-list');
+            l.innerHTML = '';
             Object.entries(hist).reverse().forEach(([id, item]) => {
-                const entry = document.createElement('div');
-                entry.className = 'history-card-item';
-                entry.innerHTML = `
-                    <span class="history-main-label">${item.text}</span>
-                    <span class="history-date-label">${item.ts}</span>
-                    <span class="btn-history-delete" onclick="deleteHistoryPermanent('${id}')">🗑️</span>
-                `;
-                list.appendChild(entry);
+                const e = document.createElement('div');
+                e.className = 'history-card-item';
+                e.innerHTML = `<span class="history-main-label">${item.text}</span><span class="history-date-label">${item.ts}</span><span class="btn-history-delete" onclick="deleteHist('${id}')">🗑️</span>`;
+                l.appendChild(e);
             });
         }
 
-        function deleteHistoryPermanent(id) {
-            if(confirm("確定永久刪除此紀錄？")) {
-                rtdb.ref(`love_v10_full/history/${id}`).remove();
-            }
-        }
-
-        function confirmAndClearReminder(id, text) {
-            createSystemSnapshot("確認已讀提醒");
-            rtdb.ref(`love_v10_full/reminders/${CURRENT_USER}/${id}`).remove();
-            recordToHistoryList(`已讀提醒：${text}`, true);
-        }
-
+        function deleteHist(id) { if(confirm("刪除此紀錄？")) rtdb.ref(`love_v11_clean/history/${id}`).remove(); }
+        function clearReminder(id) { rtdb.ref(`love_v11_clean/reminders/${CURRENT_USER}/${id}`).remove(); }
         function submitRemindToPartner() {
             const inp = document.getElementById('remind-msg-input');
-            if(!inp.value) return;
             const target = CURRENT_USER === 'ysc' ? 'lcl' : 'ysc';
-            sendDataToPath(`reminders/${target}`, { msg: inp.value, from: CURRENT_USER, ts: Date.now() }, "發送小提醒");
+            if(inp.value) sendDataToPath(`reminders/${target}`, { msg: inp.value, from: CURRENT_USER, ts: Date.now() }, "發送提醒");
             inp.value = '';
         }
-
         function createNewPlanItem(cat) {
             const inp = document.getElementById('in-plan-' + cat);
-            if(!inp.value) return;
-            sendDataToPath(`plans/${cat}`, inp.value, `添加計劃: ${inp.value}`);
+            if(inp.value) sendDataToPath(`plans/${cat}`, inp.value, `添加計劃: ${inp.value}`);
             inp.value = '';
         }
-
         function quickAddHeartToCalendar() {
-            const key = new Date().toISOString().split('T')[0];
-            sendDataToPath(`calendar/${key}`, '❤️', "添加了 ❤️");
+            const k = new Date().toISOString().split('T')[0];
+            sendDataToPath(`calendar/${k}`, '❤️', "添加了 ❤️");
         }
-
-        function requestGeminiAnalysis() {
-            const range = prompt("請選擇分析範圍：一週 / 一個月 / 三個月 / 一年");
-            if(range) alert(`正在打包近「${range}」的甜蜜數據... Gemini 正在為您生成專屬戀愛報告。`);
-        }
+        function requestGeminiAnalysis() { alert("Gemini 正在打包數據..."); }
     </script>
 </body>
 </html>
