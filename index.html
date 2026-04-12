@@ -3,31 +3,29 @@
 <head>
     <meta charset="UTF-8">
     <meta name="viewport" content="width=device-width, initial-scale=1.0, maximum-scale=1.0, user-scalable=no">
-    <title>Our Love Story - Refined Full Version</title>
+    <title>Our Love Story - Full Detailed Version</title>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-app-compat.js"></script>
     <script src="https://www.gstatic.com/firebasejs/9.15.0/firebase-database-compat.js"></script>
     
     <style>
-        /* --- 基礎變量與全局設定 --- */
+        /* --- 基礎變量 --- */
         :root {
             --ysc-color: #607d8b;
             --lcl-color: #ffafbd;
             --bg-pink: #fdf2f4;
             --white: #ffffff;
-            --gray-deep: #555555;   /* 星期顏色 */
-            --gray-mid: #888888;    /* 日期顏色 */
-            --gray-plan: #333333;   /* 未來計劃標題 */
-            --shadow-standard: 0 12px 35px rgba(0,0,0,0.07);
+            --gray-deep: #444444;   
+            --gray-mid: #888888;    
+            --gray-plan: #333333;   
+            --shadow-standard: 0 10px 30px rgba(0,0,0,0.08);
             --curve: cubic-bezier(0.175, 0.885, 0.32, 1.275);
             --transition-fast: 0.3s ease;
-            --transition-slow: 0.5s var(--curve);
         }
 
         * { 
             box-sizing: border-box; 
-            font-family: "PingFang HK", "Helvetica Neue", "Microsoft JhengHei", sans-serif; 
+            font-family: "PingFang HK", "Helvetica Neue", sans-serif; 
             -webkit-tap-highlight-color: transparent; 
-            outline: none;
         }
 
         body { 
@@ -38,7 +36,7 @@
             touch-action: pan-y; 
         }
 
-        /* --- 身分選擇頁面 (Identity Screen) --- */
+        /* --- 身份選擇頁 --- */
         #identity-screen {
             position: fixed; 
             top: 0; left: 0; right: 0; bottom: 0;
@@ -48,194 +46,182 @@
             flex-direction: column; 
             align-items: center; 
             justify-content: center;
-            transition: var(--transition-slow);
         }
         .welcome-title { 
             font-size: 2.8rem; 
             color: #8a8a8a; 
-            margin-bottom: 60px; 
+            margin-bottom: 50px; 
             font-weight: 300; 
             letter-spacing: 5px; 
-            text-align: center;
         }
         .btn-identity {
-            width: 320px; 
-            padding: 28px; 
-            margin: 18px; 
+            width: 300px; 
+            padding: 25px; 
+            margin: 15px; 
             border: none; 
-            border-radius: 65px;
-            font-size: 1.5rem; 
+            border-radius: 50px;
+            font-size: 1.4rem; 
             font-weight: bold; 
             color: white; 
             cursor: pointer; 
-            transition: var(--transition-slow);
-            position: relative;
-            overflow: hidden;
+            transition: 0.3s;
         }
-        .btn-identity:active { transform: scale(0.92); }
-        .btn-ysc-main { background: var(--ysc-color); box-shadow: 0 10px 30px rgba(96, 125, 139, 0.4); }
-        .btn-lcl-main { background: var(--lcl-color); box-shadow: 0 10px 30px rgba(255, 175, 189, 0.4); }
+        .btn-ysc-main { background: var(--ysc-color); box-shadow: 0 10px 25px rgba(96, 125, 139, 0.3); }
+        .btn-lcl-main { background: var(--lcl-color); box-shadow: 0 10px 25px rgba(255, 175, 189, 0.3); }
 
-        /* --- 頂部導航與全局撤回 --- */
+        /* --- 頂部導航 --- */
         header {
             position: sticky; 
             top: 0; 
             z-index: 8000; 
-            background: rgba(255,255,255,0.95);
-            backdrop-filter: blur(20px); 
-            border-bottom: 1px solid rgba(0,0,0,0.04);
-            box-shadow: 0 2px 15px rgba(0,0,0,0.02);
+            background: rgba(255,255,255,0.9);
+            backdrop-filter: blur(15px); 
+            border-bottom: 1px solid rgba(0,0,0,0.05);
         }
         nav { 
             display: flex; 
             justify-content: space-around; 
-            padding: 22px; 
+            padding: 20px; 
             max-width: 1200px; 
             margin: 0 auto; 
         }
         .nav-link { 
             background: none; 
             border: none; 
-            font-size: 1.2rem; 
-            font-weight: 800; 
-            color: #d1d1d1; 
+            font-size: 1.15rem; 
+            font-weight: 900; 
+            color: #ccc; 
             cursor: pointer; 
-            transition: var(--transition-fast); 
+            transition: 0.3s; 
         }
-        .nav-link.active { color: var(--accent); transform: scale(1.15); }
+        .nav-link.active { color: var(--accent); transform: scale(1.1); }
 
+        /* --- 控制按鈕優化 --- */
         #undo-master-btn {
             position: fixed; 
-            top: 20px; 
+            top: 80px; /* 往下一點，避開導航欄 */
             right: 20px; 
             z-index: 9000;
             background: var(--white); 
-            border: 2px solid #f5f5f5; 
+            border: 1px solid #eee; 
             border-radius: 50%; 
-            width: 65px; 
-            height: 65px;
+            width: 60px; 
+            height: 60px;
             box-shadow: var(--shadow-standard); 
-            cursor: pointer; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center; 
-            font-size: 1.8rem;
-            transition: var(--transition-fast);
+            font-size: 1.6rem;
+            cursor: pointer;
+            display: flex; align-items: center; justify-content: center;
         }
 
-        /* --- 手機優化垃圾桶 --- */
+        /* 垃圾桶移動到底部 */
         #dynamic-trash {
             position: fixed; 
-            top: 0; 
-            right: -95px; 
-            width: 85px; 
-            height: 100vh;
+            bottom: -80px; /* 初始隱藏 */
+            left: 0; 
+            width: 100%; 
+            height: 70px;
             background: #ff4d4d; 
             color: white; 
             display: flex; 
             align-items: center; 
             justify-content: center;
-            writing-mode: vertical-rl; 
             font-weight: 900; 
-            letter-spacing: 12px; 
-            z-index: 8500;
-            transition: 0.4s var(--curve); 
-            font-size: 1.6rem;
-            box-shadow: -5px 0 25px rgba(255, 77, 77, 0.4);
+            font-size: 1.3rem;
+            z-index: 9500;
+            transition: 0.3s var(--curve); 
+            box-shadow: 0 -5px 20px rgba(255, 77, 77, 0.3);
         }
-        #dynamic-trash.active { right: 0; }
+        #dynamic-trash.active { bottom: 0; }
 
-        /* --- 容器與組件 --- */
+        /* --- 紀念日曆模塊 --- */
         .main-scroller { 
             max-width: 1300px; 
             margin: 0 auto; 
-            padding: 15px; /* 手機端縮小邊距 */
+            padding: 15px; 
             height: calc(100vh - 80px);
             overflow-y: auto;
-            touch-action: pan-y;
         }
         .app-view { display: none; }
-        .app-view.active { display: block; animation: slideInUp 0.6s var(--curve); }
-
-        @keyframes slideInUp {
-            from { opacity: 0; transform: translateY(40px); }
-            to { opacity: 1; transform: translateY(0); }
-        }
+        .app-view.active { display: block; animation: slideUp 0.5s ease; }
+        @keyframes slideUp { from { opacity: 0; transform: translateY(20px); } to { opacity: 1; transform: translateY(0); } }
 
         .glass-card { 
             background: var(--white); 
-            border-radius: 35px; 
+            border-radius: 30px; 
             padding: 25px; 
             margin-bottom: 25px; 
             box-shadow: var(--shadow-standard); 
             position: relative; 
         }
 
-        /* --- 1. 紀念日曆模塊 - 手機大圖優化 --- */
-        .hero-stats { text-align: center; }
         .text-together-days { 
-            font-size: 1.8rem; /* 已縮小字號 */
+            font-size: 1.8rem; /* 修正字號 */
             font-weight: 900; 
             color: var(--accent); 
             margin: 0; 
-            letter-spacing: -0.5px; 
+            text-align: center;
         }
-        .text-happy-index { font-size: 1.1rem; color: #b0b0b0; margin: 10px 0 20px; font-weight: 500; }
+        .text-happy-index { 
+            font-size: 1.1rem; 
+            color: #bbb; 
+            margin: 10px 0 20px; 
+            text-align: center;
+        }
         .btn-sign-daily {
-            padding: 15px 55px; 
-            border-radius: 50px; 
+            display: block; margin: 0 auto;
+            padding: 14px 50px; 
+            border-radius: 40px; 
             border: none; 
             background: var(--accent);
             color: white; 
             font-weight: bold; 
-            font-size: 1.2rem; 
-            cursor: pointer; 
-            box-shadow: 0 8px 20px rgba(0,0,0,0.1);
+            font-size: 1.1rem; 
         }
 
-        @media (min-width: 1024px) {
-            .calendar-workspace { display: grid; grid-template-columns: 2.8fr 1.2fr; gap: 40px; }
-        }
-
-        /* 日曆去框化優化 */
-        .calendar-container-flat { 
-            padding: 5px 0; /* 移除左右多餘邊距，讓日曆更大 */
-        }
+        /* 日曆手機大圖優化 */
+        .calendar-section { padding: 5px 0; position: relative; }
         .calendar-week-labels { 
             display: grid; 
             grid-template-columns: repeat(7, 1fr); 
             text-align: center; 
-            padding: 12px 0; 
-            color: var(--gray-deep); /* 星期深灰色 */
+            padding: 10px 0; 
+            color: var(--gray-deep);
             font-weight: 900; 
-            font-size: 0.85rem; 
+            font-size: 0.8rem; 
         }
         .calendar-main-grid { 
             display: grid; 
-            grid-template-columns: repeat(7, minmax(0, 1fr)); 
-            gap: 4px; /* 縮小格子間距 */
+            grid-template-columns: repeat(7, 1fr); 
+            gap: 5px; 
         }
         .calendar-day-box {
             background: #fff; 
-            border: 1px solid #f2f2f2; 
+            border: 1px solid #f5f5f5; 
             border-radius: 12px; 
-            min-height: 95px; 
-            padding: 5px;
-            display: flex; 
-            flex-direction: column; 
-            transition: 0.2s; 
+            min-height: 90px; 
+            padding: 6px;
+            display: flex; flex-direction: column; 
             position: relative;
-            overflow: hidden;
         }
-        @media (max-width: 600px) {
-            .calendar-day-box { min-height: 80px; } /* 手機端格子高度 */
+        .calendar-day-label { font-size: 0.75rem; font-weight: 800; color: var(--gray-mid); }
+        .calendar-day-box.is-locked { background: #fcfcfc; color: #eee; }
+
+        /* ❤️ 快捷按鈕回歸 */
+        .heart-shortcut-container {
+            position: absolute;
+            right: 0;
+            top: -15px;
+            z-index: 10;
         }
-        .calendar-day-box.is-locked { background: #fdfdfd; color: #e5e5e5 !important; }
-        .calendar-day-label { 
-            font-size: 0.75rem; 
-            font-weight: 800; 
-            color: var(--gray-mid); /* 日期中灰色 */
-            margin-bottom: 4px; 
+        .btn-heart-pulse { 
+            width: 55px; height: 55px; 
+            border-radius: 50%; 
+            border: 3px solid var(--accent); 
+            background: white; 
+            color: var(--accent); 
+            font-size: 1.4rem; 
+            box-shadow: var(--shadow-standard);
+            cursor: pointer;
         }
 
         .tag-event {
@@ -245,179 +231,71 @@
             padding: 5px 8px; 
             border-radius: 8px;
             margin-top: 4px; 
-            word-break: break-all; 
-            cursor: grab; 
-            line-height: 1.2; 
             white-space: nowrap; 
             overflow: hidden; 
             text-overflow: ellipsis;
         }
         .tag-event.dragging-active { 
-            position: fixed; 
-            pointer-events: none; 
-            z-index: 11000; 
-            width: auto !important; 
-            max-width: 150px;
-            transform: scale(1.1);
-        }
-
-        .heart-shortcut-anchor { position: absolute; right: -15px; top: 20px; }
-        .btn-heart-pulse { 
-            width: 55px; 
-            height: 55px; 
-            border-radius: 50%; 
-            border: 3px solid var(--accent); 
-            background: white; 
-            color: var(--accent); 
-            font-size: 1.4rem; 
-            cursor: pointer; 
-            box-shadow: var(--shadow-standard);
+            position: fixed; z-index: 11000; width: 120px !important; opacity: 0.9;
         }
 
         /* 未來計劃 */
         .plan-category-box { 
-            background: #fafafa; 
-            border: 2px dashed #eee; 
-            border-radius: 30px; 
-            padding: 22px; 
-            min-height: 160px; 
+            background: #fafafa; border: 2px dashed #eee; 
+            border-radius: 25px; padding: 20px; 
             margin-bottom: 25px; 
         }
         .plan-category-box h4 { 
             margin: 0 0 15px 0; 
-            font-size: 1.15rem; /* 標準字號 */
-            color: var(--gray-plan); /* 極深灰色 */
-            font-weight: 900; 
-        }
-        .plan-input-row { display: flex; gap: 8px; margin-top: 15px; }
-        .plan-input-row input { 
-            flex: 1; 
-            border: 2px solid #f0f0f0; 
-            border-radius: 12px; 
-            padding: 12px 15px; 
-            font-size: 0.9rem; 
-        }
-        .plan-input-row button { 
-            border: none; 
-            background: var(--accent); 
-            color: white; 
-            border-radius: 12px; 
-            padding: 0 20px; 
+            font-size: 1.15rem; /* 與小提醒一致 */
+            color: var(--gray-plan); 
             font-weight: 900; 
         }
 
-        /* --- 2. 寶寶通訊 --- */
+        /* --- 寶寶通訊 --- */
         #chat-message-container { 
-            height: 68vh; 
-            overflow-y: auto; 
-            padding: 20px; 
-            display: flex; 
-            flex-direction: column; 
-            gap: 20px; 
-            background: #fff;
-            border-radius: 25px;
+            height: 65vh; overflow-y: auto; 
+            padding: 15px; display: flex; flex-direction: column; gap: 15px; 
+            background: #fff; border-radius: 25px;
         }
-        .chat-bubble-row { display: flex; flex-direction: column; width: 100%; }
-        .chat-bubble-row.me { align-items: flex-end; }
-        .chat-bubble-row.you { align-items: flex-start; }
         .chat-msg-body { 
-            max-width: 85%; 
-            padding: 15px 20px; 
-            border-radius: 25px; 
-            font-size: 1.05rem; 
-            line-height: 1.5; 
+            max-width: 80%; padding: 14px 18px; 
+            border-radius: 22px; font-size: 1rem; line-height: 1.4; 
         }
-        .me .chat-msg-body { background: var(--accent); color: white; border-bottom-right-radius: 5px; }
-        .you .chat-msg-body { background: #f4f4f4; color: #333; border-bottom-left-radius: 5px; }
-        .chat-msg-time { font-size: 0.7rem; color: #ccc; margin-top: 8px; }
+        .me .chat-msg-body { background: var(--accent); color: white; border-bottom-right-radius: 4px; }
+        .you .chat-msg-body { background: #f0f0f0; color: #333; border-bottom-left-radius: 4px; }
 
         .chat-dock-fixed {
-            position: fixed; 
-            bottom: 0; left: 0; 
-            width: 100%; 
-            background: white; 
-            padding: 15px 20px 40px;
-            display: flex; 
-            align-items: center; 
-            gap: 15px; 
-            border-top: 1px solid #f0f0f0; 
-            z-index: 7500;
+            position: fixed; bottom: 0; left: 0; width: 100%; 
+            background: white; padding: 15px 20px 35px;
+            display: flex; align-items: center; gap: 15px; 
+            border-top: 1px solid #f0f0f0; z-index: 7000;
         }
-        .chat-input-pill { 
-            flex: 1; 
-            background: #f7f7f7; 
-            border-radius: 40px; 
-            display: flex; 
-            align-items: center; 
-            padding: 0 20px; 
-        }
-        .chat-input-pill input { 
-            flex: 1; 
-            border: none; 
-            background: transparent; 
-            padding: 14px 0; 
-            font-size: 1rem; 
-        }
-        .btn-chat-send { 
-            background: #4caf50; 
-            color: white; 
-            border: none; 
-            width: 50px; 
-            height: 50px; 
-            border-radius: 50%; 
-            cursor: pointer; 
-            font-size: 1.4rem; 
-            display: flex; 
-            align-items: center; 
-            justify-content: center;
-        }
+        .chat-input-pill { flex: 1; background: #f5f5f5; border-radius: 30px; padding: 0 15px; }
+        .chat-input-pill input { width: 100%; border: none; background: transparent; padding: 12px 0; }
 
-        /* --- 3. 歷史紀錄 --- */
-        .history-card-item { 
-            padding: 25px; 
-            border-bottom: 1.5px solid #fafafa; 
-            position: relative; 
-        }
-        .history-main-label { display: block; font-weight: 900; color: #444; font-size: 1.15rem; margin-bottom: 8px; }
-        .history-date-label { font-size: 0.8rem; color: #bbb; }
-        .btn-history-delete { 
-            position: absolute; 
-            right: 25px; 
-            top: 30px; 
-            color: #ddd; 
-            cursor: pointer; 
-            font-size: 1.3rem; 
-        }
+        /* --- 歷史紀錄 --- */
+        .history-card-item { padding: 20px; border-bottom: 1px solid #f5f5f5; position: relative; }
+        .history-main-label { display: block; font-weight: 900; font-size: 1.1rem; margin-bottom: 5px; }
+        .history-date-label { font-size: 0.8rem; color: #ccc; }
 
         #gemini-report-trigger {
-            position: fixed; 
-            bottom: 120px; 
-            left: 50%; 
-            transform: translateX(-50%);
-            background: linear-gradient(45deg, #ff9a9e, #fad0c4, #a1c4fd, #c2e9fb);
-            background-size: 200%; 
-            padding: 20px 45px; 
-            border-radius: 70px; 
-            color: white; 
-            border: none; 
-            font-weight: 900;
-            box-shadow: 0 10px 35px rgba(0,0,0,0.15); 
-            cursor: pointer; 
-            z-index: 7000; 
-            font-size: 1.15rem;
+            position: fixed; bottom: 110px; left: 50%; transform: translateX(-50%);
+            background: linear-gradient(45deg, #ffafbd, #ffc3a0);
+            padding: 18px 40px; border-radius: 50px; color: white; border: none; font-weight: 900;
         }
     </style>
 </head>
 <body>
 
     <div id="identity-screen">
-        <div class="welcome-title">和你的Love Story</div>
+        <div class="welcome-title">Love Story</div>
         <button class="btn-identity btn-ysc-main" onclick="startApp('ysc')">我是 ysc</button>
         <button class="btn-identity btn-lcl-main" onclick="startApp('lcl')">我是 lcl</button>
     </div>
 
-    <button id="undo-master-btn" title="撤回上一個操作" onclick="handleUndoSystem()">↩️</button>
-    <div id="dynamic-trash">🗑️ 拖到此處刪除</div>
+    <button id="undo-master-btn" onclick="handleUndoSystem()">↩️</button>
+    <div id="dynamic-trash">🗑️ 釋放以刪除</div>
 
     <header>
         <nav>
@@ -430,58 +308,54 @@
     <div class="main-scroller">
         
         <div id="view-cal" class="app-view active">
-            <div class="glass-card hero-stats">
-                <p class="text-together-days" id="val-together-days">在一起 0 日</p>
+            <div class="glass-card">
+                <p class="text-together-days" id="val-together-days">載入中...</p>
                 <p class="text-happy-index" id="val-happiness-score">我們的幸福指數：0.0</p>
-                <button class="btn-sign-daily" onclick="executeSignAction()">打卡</button>
+                <button class="btn-sign-daily" onclick="executeSignAction()">每日打卡</button>
             </div>
 
-            <div class="calendar-workspace">
-                <div class="calendar-column-left">
-                    <div class="glass-card">
-                        <small style="color:#000; font-weight:900; letter-spacing:1px; text-transform:uppercase; font-size:1.15rem;">🔔 給對方的小提醒</small>
-                        <div id="reminder-display-list" style="margin-top:20px;"></div>
-                        <div class="plan-input-row">
-                            <input type="text" id="remind-msg-input" placeholder="填入的提示僅對方可見">
-                            <button onclick="submitRemindToPartner()">發送</button>
-                        </div>
-                    </div>
+            <div class="glass-card">
+                <small style="color:#000; font-weight:900; font-size:1.15rem;">🔔 給對方的小提醒</small>
+                <div id="reminder-display-list" style="margin-top:15px;"></div>
+                <div style="display:flex; gap:10px; margin-top:15px;">
+                    <input type="text" id="remind-msg-input" placeholder="提醒對方..." style="flex:1; border:1px solid #eee; border-radius:10px; padding:10px;">
+                    <button onclick="submitRemindToPartner()" style="background:var(--accent); color:white; border:none; border-radius:10px; padding:0 15px;">發送</button>
+                </div>
+            </div>
 
-                    <div class="calendar-container-flat">
-                        <div class="heart-shortcut-anchor">
-                            <button class="btn-heart-pulse" onclick="quickAddHeartToCalendar()">❤️</button>
-                        </div>
-                        <div class="calendar-week-labels">
-                            <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
-                        </div>
-                        <div id="calendar-render-grid" class="calendar-main-grid"></div>
+            <div class="calendar-section">
+                <div class="heart-shortcut-container">
+                    <button class="btn-heart-pulse" onclick="quickAddHeartToCalendar()">❤️</button>
+                </div>
+                <div class="calendar-week-labels">
+                    <div>Sun</div><div>Mon</div><div>Tue</div><div>Wed</div><div>Thu</div><div>Fri</div><div>Sat</div>
+                </div>
+                <div id="calendar-render-grid" class="calendar-main-grid"></div>
+            </div>
+
+            <div style="margin-top:30px;">
+                <div class="plan-category-box" id="pbox-eat">
+                    <h4>🍔 豬癮犯了</h4>
+                    <div id="list-render-eat"></div>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <input type="text" id="in-plan-eat" placeholder="添加想吃的..." style="flex:1; border:none; padding:10px; border-radius:10px;">
+                        <button onclick="createNewPlanItem('eat')" style="background:var(--accent); color:white; border:none; border-radius:10px; width:40px;">+</button>
                     </div>
                 </div>
-
-                <div class="plan-column-right" style="margin-top:25px;">
-                    <div class="plan-category-box" id="pbox-eat">
-                        <h4>🍔 豬癮犯了</h4>
-                        <div class="plan-render-list" id="list-render-eat"></div>
-                        <div class="plan-input-row">
-                            <input type="text" id="in-plan-eat" placeholder="想吃什麼...">
-                            <button onclick="createNewPlanItem('eat')">+</button>
-                        </div>
+                <div class="plan-category-box" id="pbox-go">
+                    <h4>📍 腳好累呀</h4>
+                    <div id="list-render-go"></div>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <input type="text" id="in-plan-go" placeholder="想去哪裡..." style="flex:1; border:none; padding:10px; border-radius:10px;">
+                        <button onclick="createNewPlanItem('go')" style="background:var(--accent); color:white; border:none; border-radius:10px; width:40px;">+</button>
                     </div>
-                    <div class="plan-category-box" id="pbox-go">
-                        <h4>📍 腳好累呀</h4>
-                        <div class="plan-render-list" id="list-render-go"></div>
-                        <div class="plan-input-row">
-                            <input type="text" id="in-plan-go" placeholder="想到哪裡...">
-                            <button onclick="createNewPlanItem('go')">+</button>
-                        </div>
-                    </div>
-                    <div class="plan-category-box" id="pbox-do">
-                        <h4>✨ 好無聊呀</h4>
-                        <div class="plan-render-list" id="list-render-do"></div>
-                        <div class="plan-input-row">
-                            <input type="text" id="in-plan-do" placeholder="想做什麼...">
-                            <button onclick="createNewPlanItem('do')">+</button>
-                        </div>
+                </div>
+                <div class="plan-category-box" id="pbox-do">
+                    <h4>✨ 好無聊呀</h4>
+                    <div id="list-render-do"></div>
+                    <div style="display:flex; gap:10px; margin-top:10px;">
+                        <input type="text" id="in-plan-do" placeholder="想做什麼..." style="flex:1; border:none; padding:10px; border-radius:10px;">
+                        <button onclick="createNewPlanItem('do')" style="background:var(--accent); color:white; border:none; border-radius:10px; width:40px;">+</button>
                     </div>
                 </div>
             </div>
@@ -490,24 +364,23 @@
         <div id="view-chat" class="app-view">
             <div id="chat-message-container"></div>
             <div class="chat-dock-fixed">
-                <input type="file" id="chat-file-upload" hidden accept="image/*" onchange="processChatImage(this)">
-                <span style="font-size: 2rem; cursor:pointer;" onclick="document.getElementById('chat-file-upload').click()">🖼️</span>
+                <span style="font-size: 1.8rem;">🖼️</span>
                 <div class="chat-input-pill">
-                    <input type="text" id="chat-text-field" placeholder="傳送甜蜜訊息...">
+                    <input type="text" id="chat-text-field" placeholder="傳送訊息...">
                 </div>
-                <button class="btn-chat-send" onclick="sendChatTextMessage()">↑</button>
+                <button onclick="sendChatTextMessage()" style="background:#4caf50; color:white; border:none; width:45px; height:45px; border-radius:50%;">↑</button>
             </div>
         </div>
 
         <div id="view-hist" class="app-view">
             <div id="history-master-list"></div>
-            <button id="gemini-report-trigger" onclick="requestGeminiAnalysis()">交給 Gemini 生成我們的戀愛報告</button>
+            <button id="gemini-report-trigger">生成戀愛週報</button>
         </div>
 
     </div>
 
     <script>
-        // Firebase 配置
+        // 1. 初始化
         const FB_CONFIG = {
             apiKey: "AIzaSyDvzd2ZhT-HfuJoJ28S14cun-6D_wNILtg",
             authDomain: "ourloveplanner.firebaseapp.com",
@@ -521,272 +394,244 @@
         const rtdb = firebase.database();
 
         let CURRENT_USER = '';
-        let UNDO_STACK = []; 
-        let DRAG_CONTEXT = null; 
-        let DRAG_MIRROR_DOM = null; 
-        const DATE_RELATIONSHIP_START = new Date('2024-09-18');
+        let UNDO_STACK = [];
+        let DRAG_CONTEXT = null;
+        let DRAG_MIRROR = null;
+        const START_DATE = new Date('2024-09-18');
 
-        function startApp(userRole) {
-            CURRENT_USER = userRole;
+        function startApp(role) {
+            CURRENT_USER = role;
             document.getElementById('identity-screen').style.display = 'none';
-            document.documentElement.style.setProperty('--accent', userRole === 'ysc' ? 'var(--ysc-color)' : 'var(--lcl-color)');
+            document.documentElement.style.setProperty('--accent', role === 'ysc' ? 'var(--ysc-color)' : 'var(--lcl-color)');
             
-            const daysCount = Math.ceil(Math.abs(new Date() - DATE_RELATIONSHIP_START) / (1000 * 60 * 60 * 24));
-            document.getElementById('val-together-days').innerText = `在一起 ${daysCount} 日`;
+            const diff = Math.ceil(Math.abs(new Date() - START_DATE) / (1000 * 60 * 60 * 24));
+            document.getElementById('val-together-days').innerText = `在一起 ${diff} 日`;
             
-            initializeDataSynchronization();
-            runBackgroundAutomations();
+            syncData();
+            runBackgroundTasks();
         }
 
-        function navigateTo(targetId) {
+        function navigateTo(id) {
             document.querySelectorAll('.app-view, .nav-link').forEach(el => el.classList.remove('active'));
-            document.getElementById('view-' + targetId).classList.add('active');
-            document.getElementById('btn-nav-' + targetId).classList.add('active');
-            if(targetId === 'chat') {
-                const s = document.getElementById('chat-message-container');
-                s.scrollTop = s.scrollHeight;
-            }
+            document.getElementById('view-' + id).classList.add('active');
+            document.getElementById('btn-nav-' + id).classList.add('active');
         }
 
-        async function createSystemSnapshot(actionLabel) {
-            const snapshot = await rtdb.ref('love_v11_clean').once('value');
-            UNDO_STACK.push({ payload: snapshot.val(), label: actionLabel });
-        }
-
-        function handleUndoSystem() {
-            if (!UNDO_STACK.length) return alert("沒有可撤回的操作");
-            const lastPoint = UNDO_STACK.pop();
-            rtdb.ref('love_v11_clean').set(lastPoint.payload);
-            alert(`已撤回：${lastPoint.label}`);
-        }
-
-        function initializeDataSynchronization() {
-            rtdb.ref('love_v11_clean').on('value', snapshot => {
+        // 2. 數據核心
+        function syncData() {
+            rtdb.ref('love_v12_full').on('value', snapshot => {
                 const data = snapshot.val() || {};
-                renderCalendarModule(data.calendar || {});
-                renderReminderModule(data.reminders || {});
-                renderPlanModule(data.plans || {});
-                renderChatModule(data.chats || {});
-                renderHistoryModule(data.history || {});
-                calculateHappinessMetric(data.calendar || {}, data.signs || {});
+                renderCalendar(data.calendar || {});
+                renderReminders(data.reminders || {});
+                renderPlans(data.plans || {});
+                renderChats(data.chats || {});
+                renderHistory(data.history || {});
+                updateHappiness(data.calendar || {}, data.signs || {});
             });
         }
 
-        // 拖拽邏輯
-        function setupDraggable(domElement, metadata) {
-            const handleStart = (posX, posY) => {
-                DRAG_CONTEXT = metadata;
-                DRAG_MIRROR_DOM = domElement.cloneNode(true);
-                DRAG_MIRROR_DOM.classList.add('tag-event', 'dragging-active');
-                DRAG_MIRROR_DOM.style.left = posX - 30 + 'px';
-                DRAG_MIRROR_DOM.style.top = posY - 15 + 'px';
-                document.body.appendChild(DRAG_MIRROR_DOM);
+        async function saveAction(path, val, log) {
+            const snap = await rtdb.ref('love_v12_full').once('value');
+            UNDO_STACK.push({ payload: snap.val(), label: log });
+            rtdb.ref('love_v12_full/' + path).push(val);
+            if (!path.includes('chats')) recordHistory(log);
+            rtdb.ref('love_v12_full/last_active').set(Date.now());
+        }
+
+        function handleUndoSystem() {
+            if (!UNDO_STACK.length) return alert("沒有紀錄");
+            const last = UNDO_STACK.pop();
+            rtdb.ref('love_v12_full').set(last.payload);
+            alert("已撤回：" + last.label);
+        }
+
+        // 3. 拖拽引擎
+        function makeDraggable(dom, meta) {
+            const onStart = (x, y) => {
+                DRAG_CONTEXT = meta;
+                DRAG_MIRROR = dom.cloneNode(true);
+                DRAG_MIRROR.classList.add('tag-event', 'dragging-active');
+                DRAG_MIRROR.style.left = x - 20 + 'px';
+                DRAG_MIRROR.style.top = y - 10 + 'px';
+                document.body.appendChild(DRAG_MIRROR);
                 document.getElementById('dynamic-trash').classList.add('active');
             };
-            domElement.onmousedown = (e) => handleStart(e.clientX, e.clientY);
-            domElement.ontouchstart = (e) => handleStart(e.touches[0].clientX, e.touches[0].clientY);
+            dom.onmousedown = (e) => onStart(e.clientX, e.clientY);
+            dom.ontouchstart = (e) => onStart(e.touches[0].clientX, e.touches[0].clientY);
         }
 
         window.onmousemove = window.ontouchmove = (e) => {
-            if (!DRAG_MIRROR_DOM) return;
-            const x = e.clientX || (e.touches ? e.touches[0].clientX : 0);
-            const y = e.clientY || (e.touches ? e.touches[0].clientY : 0);
-            DRAG_MIRROR_DOM.style.left = x - 30 + 'px';
-            DRAG_MIRROR_DOM.style.top = y - 15 + 'px';
+            if (!DRAG_MIRROR) return;
+            const x = e.clientX || e.touches[0].clientX;
+            const y = e.clientY || e.touches[0].clientY;
+            DRAG_MIRROR.style.left = x - 20 + 'px';
+            DRAG_MIRROR.style.top = y - 10 + 'px';
         };
 
         window.onmouseup = window.ontouchend = (e) => {
-            if (!DRAG_MIRROR_DOM) return;
-            const finalX = e.clientX || (e.changedTouches ? e.changedTouches[0].clientX : 0);
-            const finalY = e.clientY || (e.changedTouches ? e.changedTouches[0].clientY : 0);
-            const target = document.elementFromPoint(finalX, finalY);
-            
+            if (!DRAG_MIRROR) return;
+            const x = e.clientX || e.changedTouches[0].clientX;
+            const y = e.clientY || e.changedTouches[0].clientY;
+            const target = document.elementFromPoint(x, y);
             const trash = document.getElementById('dynamic-trash');
+
             if (target === trash || trash.contains(target)) {
-                createSystemSnapshot(`刪除 ${DRAG_CONTEXT.val}`);
-                if (DRAG_CONTEXT.source === 'CAL') rtdb.ref(`love_v11_clean/calendar/${DRAG_CONTEXT.date}/${DRAG_CONTEXT.id}`).remove();
-                else rtdb.ref(`love_v11_clean/plans/${DRAG_CONTEXT.cat}/${DRAG_CONTEXT.id}`).remove();
+                if (DRAG_CONTEXT.source === 'CAL') rtdb.ref(`love_v12_full/calendar/${DRAG_CONTEXT.date}/${DRAG_CONTEXT.id}`).remove();
+                else rtdb.ref(`love_v12_full/plans/${DRAG_CONTEXT.cat}/${DRAG_CONTEXT.id}`).remove();
             } else {
-                const dayBox = target.closest('.calendar-day-box');
-                if (dayBox) {
-                    const newDate = dayBox.dataset.date;
-                    createSystemSnapshot(`移動 ${DRAG_CONTEXT.val}`);
-                    if (DRAG_CONTEXT.source === 'CAL') rtdb.ref(`love_v11_clean/calendar/${DRAG_CONTEXT.date}/${DRAG_CONTEXT.id}`).remove();
-                    else rtdb.ref(`love_v11_clean/plans/${DRAG_CONTEXT.cat}/${DRAG_CONTEXT.id}`).remove();
-                    rtdb.ref(`love_v11_clean/calendar/${newDate}`).push(DRAG_CONTEXT.val);
+                const day = target.closest('.calendar-day-box');
+                if (day) {
+                    const newDate = day.dataset.date;
+                    if (DRAG_CONTEXT.source === 'CAL') rtdb.ref(`love_v12_full/calendar/${DRAG_CONTEXT.date}/${DRAG_CONTEXT.id}`).remove();
+                    else rtdb.ref(`love_v12_full/plans/${DRAG_CONTEXT.cat}/${DRAG_CONTEXT.id}`).remove();
+                    rtdb.ref(`love_v12_full/calendar/${newDate}`).push(DRAG_CONTEXT.val);
                 }
             }
-            DRAG_MIRROR_DOM.remove(); DRAG_MIRROR_DOM = null; DRAG_CONTEXT = null;
+            DRAG_MIRROR.remove(); DRAG_MIRROR = null;
             trash.classList.remove('active');
         };
 
-        function renderCalendarModule(calData) {
+        // 4. 渲染邏輯
+        function renderCalendar(cal) {
             const grid = document.getElementById('calendar-render-grid');
             grid.innerHTML = '';
-            const today = new Date();
-            const startPoint = new Date(today);
-            startPoint.setDate(today.getDate() - today.getDay());
-            const months = ["Jan", "Feb", "Mar", "Apr", "May", "Jun", "Jul", "Aug", "Sep", "Oct", "Nov", "Dec"];
-
+            const start = new Date(); start.setDate(start.getDate() - start.getDay());
+            
             for (let i = 0; i < 35; i++) {
-                const day = new Date(startPoint);
-                day.setDate(startPoint.getDate() + i);
-                const isoKey = day.toISOString().split('T')[0];
-                const isPast = day < new Date().setHours(0,0,0,0);
-
+                const d = new Date(start); d.setDate(start.getDate() + i);
+                const k = d.toISOString().split('T')[0];
                 const cell = document.createElement('div');
-                cell.className = `calendar-day-box ${isPast ? 'is-locked' : ''}`;
-                cell.dataset.date = isoKey;
-                cell.innerHTML = `<span class="calendar-day-label">${day.getDate()}/${months[day.getMonth()]}</span>`;
+                cell.className = `calendar-day-box ${d < new Date().setHours(0,0,0,0) ? 'is-locked' : ''}`;
+                cell.dataset.date = k;
+                cell.innerHTML = `<span class="calendar-day-label">${d.getDate()}</span>`;
 
-                if (calData[isoKey]) {
-                    Object.entries(calData[isoKey]).forEach(([id, val]) => {
+                if (cal[k]) {
+                    Object.entries(cal[k]).forEach(([id, val]) => {
                         const tag = document.createElement('div');
                         tag.className = 'tag-event'; tag.innerText = val;
-                        setupDraggable(tag, { source: 'CAL', date: isoKey, id, val });
+                        makeDraggable(tag, { source: 'CAL', date: k, id, val });
                         cell.appendChild(tag);
                     });
                 }
-                cell.onclick = (e) => {
-                    if (e.target === cell) {
-                        const txt = prompt("添加事件：");
-                        if (txt) sendDataToPath(`calendar/${isoKey}`, txt, `添加: ${txt}`);
-                    }
-                };
+                cell.onclick = (e) => { if(e.target === cell) { 
+                    const t = prompt("事件內容："); 
+                    if(t) saveAction(`calendar/${k}`, t, "日曆添加："+t); 
+                }};
                 grid.appendChild(cell);
             }
         }
 
-        function renderPlanModule(plans) {
-            ['eat', 'go', 'do'].forEach(type => {
-                const listDom = document.getElementById('list-render-' + type);
-                listDom.innerHTML = '';
-                Object.entries(plans[type] || {}).forEach(([id, val]) => {
+        function renderPlans(plans) {
+            ['eat', 'go', 'do'].forEach(cat => {
+                const l = document.getElementById('list-render-' + cat);
+                l.innerHTML = '';
+                Object.entries(plans[cat] || {}).forEach(([id, val]) => {
                     const tag = document.createElement('div');
                     tag.className = 'tag-event'; tag.innerText = val;
-                    setupDraggable(tag, { source: 'PLAN', cat: type, id, val });
-                    listDom.appendChild(tag);
+                    makeDraggable(tag, { source: 'PLAN', cat, id, val });
+                    l.appendChild(tag);
                 });
             });
         }
 
-        function renderReminderModule(reminders) {
-            const area = document.getElementById('reminder-display-list');
-            area.innerHTML = '';
-            Object.entries(reminders[CURRENT_USER] || {}).forEach(([id, info]) => {
-                const card = document.createElement('div');
-                card.className = 'glass-card';
-                card.style = "padding:15px; margin-bottom:12px; display:flex; justify-content:space-between; align-items:center;";
-                card.innerHTML = `<span>💌 ${info.msg}</span><button onclick="clearReminder('${id}')" style="background:none; border:none; font-size:1.8rem;">✅</button>`;
-                area.appendChild(card);
+        function renderReminders(rems) {
+            const l = document.getElementById('reminder-display-list');
+            l.innerHTML = '';
+            Object.entries(rems[CURRENT_USER] || {}).forEach(([id, info]) => {
+                const d = document.createElement('div');
+                d.innerHTML = `<div style="padding:10px; background:#fffafb; border-radius:10px; margin-bottom:5px; display:flex; justify-content:space-between;">
+                    <span>💌 ${info.msg}</span><button onclick="clearRem('${id}')" style="border:none; background:none;">✅</button>
+                </div>`;
+                l.appendChild(d);
             });
         }
 
-        function sendDataToPath(path, val, logMsg) {
-            createSystemSnapshot(logMsg);
-            rtdb.ref('love_v11_clean/' + path).push(val);
-            if (!path.includes('chats')) recordToHistory(logMsg);
-            rtdb.ref('love_v11_clean/last_interaction').set(Date.now());
-        }
-
-        async function executeSignAction() {
-            const todayK = new Date().toISOString().split('T')[0];
-            const check = await rtdb.ref(`love_v11_clean/signs/${todayK}/${CURRENT_USER}`).once('value');
-            if (check.exists()) return alert("今天已打過卡啦");
-            createSystemSnapshot("打卡");
-            rtdb.ref(`love_v11_clean/signs/${todayK}/${CURRENT_USER}`).set(true);
-            recordToHistory("今日打卡成功！");
-        }
-
-        function recordToHistory(txt) {
-            const d = new Date();
-            const timeStr = `${d.getFullYear()}/${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${d.getMinutes()}`;
-            rtdb.ref('love_v11_clean/history').push({ text: txt, ts: timeStr });
-        }
-
-        function calculateHappinessMetric(cal, signs) {
-            let l = 0, b = 0, s = 0;
-            const limit = Date.now() - 30 * 86400000;
-            Object.entries(cal).forEach(([d, items]) => {
-                if (new Date(d) > limit) Object.values(items).forEach(v => {
-                    if(v.includes('❤️')) l++; if(v.includes('💣')) b++;
-                });
-            });
-            Object.entries(signs || {}).forEach(([d, us]) => { if (new Date(d) > limit) s += Object.keys(us).length; });
-            document.getElementById('val-happiness-score').innerText = `我們的幸福指數：${((l - b) * 7 + s).toFixed(1)}`;
-        }
-
-        function runBackgroundAutomations() {
-            setInterval(async () => {
-                const n = new Date();
-                if (n.getHours() === 23 && n.getMinutes() === 59 && n.getSeconds() === 59) {
-                    const snap = await rtdb.ref('love_v11_clean').once('value');
-                    const d = snap.val() || {};
-                    if (Date.now() - (d.last_interaction || 0) > 86400000) {
-                        rtdb.ref(`love_v11_clean/calendar/${n.toISOString().split('T')[0]}`).push('💣');
-                        recordToHistory("💣好像和寶寶吵架了");
-                    }
-                }
-            }, 1000);
-            if (CURRENT_USER === 'ysc') {
-                const k = 'bot_v11_' + new Date().toDateString();
-                if (!localStorage.getItem(k)) {
-                    setTimeout(() => {
-                        rtdb.ref('love_v11_clean/chats').push({ type: 'text', val: "我是余尚初的小替身，他偷偷告訴我說他想你了🥺", sender: 'ysc', ts: Date.now() });
-                        localStorage.setItem(k, '1');
-                    }, Math.random() * 4 * 3600000 + 8 * 3600000);
-                }
-            }
-        }
-
-        function sendChatTextMessage() {
-            const f = document.getElementById('chat-text-field');
-            if (!f.value) return;
-            rtdb.ref('love_v11_clean/chats').push({ type: 'text', val: f.value, sender: CURRENT_USER, ts: Date.now() });
-            f.value = '';
-        }
-
-        function renderChatModule(chats) {
+        function renderChats(chats) {
             const c = document.getElementById('chat-message-container');
             c.innerHTML = '';
             Object.entries(chats).forEach(([id, m]) => {
-                const row = document.createElement('div');
-                row.className = `chat-bubble-row ${m.sender === CURRENT_USER ? 'me' : 'you'}`;
-                row.innerHTML = `<div class="chat-msg-body">${m.val}</div><div class="chat-msg-time">${new Date(m.ts).toLocaleString()}</div>`;
-                c.appendChild(row);
+                const d = document.createElement('div');
+                d.className = `chat-bubble-row ${m.sender === CURRENT_USER ? 'me' : 'you'}`;
+                d.innerHTML = `<div class="chat-msg-body">${m.val}</div>`;
+                c.appendChild(d);
             });
             c.scrollTop = c.scrollHeight;
         }
 
-        function renderHistoryModule(hist) {
+        function renderHistory(hist) {
             const l = document.getElementById('history-master-list');
             l.innerHTML = '';
             Object.entries(hist).reverse().forEach(([id, item]) => {
-                const e = document.createElement('div');
-                e.className = 'history-card-item';
-                e.innerHTML = `<span class="history-main-label">${item.text}</span><span class="history-date-label">${item.ts}</span><span class="btn-history-delete" onclick="deleteHist('${id}')">🗑️</span>`;
-                l.appendChild(e);
+                const d = document.createElement('div');
+                d.className = 'history-card-item';
+                d.innerHTML = `<span class="history-main-label">${item.text}</span><span class="history-date-label">${item.ts}</span>`;
+                l.appendChild(d);
             });
         }
 
-        function deleteHist(id) { if(confirm("刪除此紀錄？")) rtdb.ref(`love_v11_clean/history/${id}`).remove(); }
-        function clearReminder(id) { rtdb.ref(`love_v11_clean/reminders/${CURRENT_USER}/${id}`).remove(); }
+        // 5. 功能函數
+        async function executeSignAction() {
+            const k = new Date().toISOString().split('T')[0];
+            const check = await rtdb.ref(`love_v12_full/signs/${k}/${CURRENT_USER}`).once('value');
+            if (check.exists()) return alert("已打卡");
+            rtdb.ref(`love_v12_full/signs/${k}/${CURRENT_USER}`).set(true);
+            recordHistory("今日成功打卡！");
+        }
+
+        function recordHistory(t) {
+            const d = new Date();
+            const ts = `${d.getMonth()+1}/${d.getDate()} ${d.getHours()}:${d.getMinutes()}`;
+            rtdb.ref('love_v12_full/history').push({ text: t, ts: ts });
+        }
+
+        function updateHappiness(cal, signs) {
+            let score = 0;
+            Object.values(cal).forEach(day => Object.values(day).forEach(v => {
+                if(v.includes('❤️')) score += 7;
+                if(v.includes('💣')) score -= 7;
+            }));
+            document.getElementById('val-happiness-score').innerText = `我們的幸福指數：${score.toFixed(1)}`;
+        }
+
+        function runBackgroundTasks() {
+            // 吵架監測
+            setInterval(async () => {
+                const now = new Date();
+                if (now.getHours() === 23 && now.getMinutes() === 59) {
+                    const snap = await rtdb.ref('love_v12_full').once('value');
+                    const d = snap.val() || {};
+                    if (Date.now() - (d.last_active || 0) > 86400000) {
+                        rtdb.ref(`love_v12_full/calendar/${now.toISOString().split('T')[0]}`).push('💣');
+                    }
+                }
+            }, 60000);
+        }
+
         function submitRemindToPartner() {
-            const inp = document.getElementById('remind-msg-input');
+            const i = document.getElementById('remind-msg-input');
             const target = CURRENT_USER === 'ysc' ? 'lcl' : 'ysc';
-            if(inp.value) sendDataToPath(`reminders/${target}`, { msg: inp.value, from: CURRENT_USER, ts: Date.now() }, "發送提醒");
-            inp.value = '';
+            if(i.value) saveAction(`reminders/${target}`, { msg: i.value }, "發送提醒：" + i.value);
+            i.value = '';
         }
+
         function createNewPlanItem(cat) {
-            const inp = document.getElementById('in-plan-' + cat);
-            if(inp.value) sendDataToPath(`plans/${cat}`, inp.value, `添加計劃: ${inp.value}`);
-            inp.value = '';
+            const i = document.getElementById('in-plan-' + cat);
+            if(i.value) saveAction(`plans/${cat}`, i.value, "添加計劃：" + i.value);
+            i.value = '';
         }
+
         function quickAddHeartToCalendar() {
             const k = new Date().toISOString().split('T')[0];
-            sendDataToPath(`calendar/${k}`, '❤️', "添加了 ❤️");
+            saveAction(`calendar/${k}`, '❤️', "添加了 ❤️");
         }
-        function requestGeminiAnalysis() { alert("Gemini 正在打包數據..."); }
+
+        function sendChatTextMessage() {
+            const i = document.getElementById('chat-text-field');
+            if(i.value) rtdb.ref('love_v12_full/chats').push({ val: i.value, sender: CURRENT_USER, ts: Date.now() });
+            i.value = '';
+        }
+
+        function clearRem(id) { rtdb.ref(`love_v12_full/reminders/${CURRENT_USER}/${id}`).remove(); }
     </script>
 </body>
 </html>
